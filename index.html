@@ -89,6 +89,9 @@ button { font-family: var(--f); }
 .st.Recusado { background: var(--bad); color: #fff; }
 .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
 .acts input { grid-column: 1 / -1; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.segb { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 6px; border-radius: 8px; font: 500 .86rem var(--f); cursor: pointer; }
+.segb[aria-pressed="true"] { background: var(--azul); color: var(--azul-ink); border-color: var(--azul); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .row2:has(> .btn[hidden]) { grid-template-columns: 1fr; }
 .tw { overflow-x: auto; margin: 0 -4px; }
@@ -144,7 +147,7 @@ a.link { color: var(--ink); font-weight: 500; }
     <nav class="tabs" role="tablist">
       <button role="tab" aria-selected="true" data-tab="picar">Picar</button>
       <button role="tab" aria-selected="false" data-tab="meus">Registos</button>
-      <button role="tab" aria-selected="false" data-tab="ferias">Férias<span class="badge" id="fBadge" hidden></span></button>
+      <button role="tab" aria-selected="false" data-tab="ferias">Pedidos<span class="badge" id="fBadge" hidden></span></button>
       <button role="tab" aria-selected="false" data-tab="gestao" id="tabGestao" hidden>Gestão<span class="badge" id="gBadge" hidden></span></button>
     </nav>
 
@@ -190,7 +193,42 @@ a.link { color: var(--ink); font-weight: 500; }
     </section>
 
     <section id="tMeus" hidden style="display:grid;gap:14px">
+      <details class="panel" id="dados">
+        <summary style="cursor:pointer;font-weight:500;font-size:1.05rem">Os meus dados</summary>
+        <div style="display:grid;gap:10px;margin-top:12px">
+          <div id="dFixos" class="small"></div>
+          <label for="dEmail">Email <input id="dEmail" type="email" maxlength="120" autocomplete="email"></label>
+          <label for="dMorada">Morada <input id="dMorada" maxlength="250" autocomplete="street-address"></label>
+          <button class="btn sec" id="btnDados">Guardar email e morada</button>
+          <p class="muted small">Para corrigir o nome, a data de nascimento, o NIF, o NISS ou o telemóvel, fale com o escritório. O email serve para receber as respostas aos seus pedidos.</p>
+        </div>
+      </details>
       <div class="panel">
+        <label for="mMes">Mês <input id="mMes" type="month"></label>
+        <div class="tiles" id="mTiles"></div>
+      </div>
+      <div class="panel" id="mLista"><p class="muted">A carregar…</p></div>
+    </section>
+
+    <section id="tFerias" hidden style="display:grid;gap:14px">
+      <div class="seg" role="group" aria-label="Tipo de pedido">
+        <button class="segb" data-p="pFalta" aria-pressed="true">Avisar falta</button>
+        <button class="segb" data-p="pCorr" aria-pressed="false">Esqueci-me de picar</button>
+        <button class="segb" data-p="pFer" aria-pressed="false">Férias</button>
+      </div>
+      <div class="panel" id="pFalta">
+        <h2 id="aTitulo">Avisar que vou faltar</h2>
+        <p class="muted small">O aviso vai por email para o escritório. Se for aprovado, conta como falta justificada.</p>
+        <div class="row2">
+          <label for="avDe">Dia <input id="avDe" type="date"></label>
+          <label for="avAte">Até (opcional) <input id="avAte" type="date"></label>
+        </div>
+        <label for="avMotivo">Motivo <select id="avMotivo"></select></label>
+        <label for="avDet">Detalhe <input id="avDet" maxlength="300" placeholder="Ex.: consulta no centro de saúde às 9h"></label>
+        <div class="row2"><button class="btn" id="btnAviso">Enviar aviso</button><button class="btn sec" id="btnAvisoCancel" hidden>Cancelar alteração</button></div>
+        <div id="avLista"></div>
+      </div>
+      <div class="panel" id="pCorr" hidden>
         <h2 id="cTitulo">Esqueceu-se de picar?</h2>
         <p class="muted small">Peça ao gestor para registar o dia. Só conta depois de aprovado.</p>
         <div class="row2">
@@ -205,14 +243,7 @@ a.link { color: var(--ink); font-weight: 500; }
         <div class="row2"><button class="btn" id="btnCorr">Enviar ao gestor</button><button class="btn sec" id="btnCorrCancel" hidden>Cancelar alteração</button></div>
         <div id="cLista"></div>
       </div>
-      <div class="panel">
-        <label for="mMes">Mês <input id="mMes" type="month"></label>
-        <div class="tiles" id="mTiles"></div>
-      </div>
-      <div class="panel" id="mLista"><p class="muted">A carregar…</p></div>
-    </section>
-
-    <section id="tFerias" hidden style="display:grid;gap:14px">
+      <div id="pFer" hidden style="display:grid;gap:14px">
       <div class="panel">
         <h2>Pedir férias</h2>
         <p class="muted small" id="fRegras"></p>
@@ -226,7 +257,8 @@ a.link { color: var(--ink); font-weight: 500; }
         <div class="row2"><button class="btn" id="btnPedir">Pedir férias</button><button class="btn sec" id="btnPedirCancel" hidden>Cancelar alteração</button></div>
         <p class="muted small">O pedido fica pendente até o gestor aprovar. Só depois os dias contam como férias.</p>
       </div>
-      <div class="panel"><h2>Os meus pedidos</h2><div id="fLista"><p class="muted">A carregar…</p></div></div>
+      <div class="panel"><h2>Os meus pedidos de férias</h2><div id="fLista"><p class="muted">A carregar…</p></div></div>
+      </div>
     </section>
 
     <section id="tGestao" hidden style="display:grid;gap:14px">
@@ -250,6 +282,28 @@ a.link { color: var(--ink); font-weight: 500; }
         <h2 class="err">Relatório por aprovar</h2>
         <p class="small" id="gPendTxt"></p>
       </div>
+      <details class="panel" id="gFichas">
+        <summary style="cursor:pointer;font-weight:500;font-size:1.1rem">Fichas dos colaboradores</summary>
+        <div style="display:grid;gap:10px;margin-top:12px">
+          <label for="fcColab">Colaborador <select id="fcColab"></select></label>
+          <div id="fcForm" hidden style="display:grid;gap:10px">
+            <label for="fcNome">Nome completo <input id="fcNome" maxlength="120"></label>
+            <div class="row2">
+              <label for="fcNasc">Data de nascimento <input id="fcNasc" type="date"></label>
+              <label for="fcTel">Telemóvel <input id="fcTel" inputmode="numeric" maxlength="13"></label>
+            </div>
+            <div class="row2">
+              <label for="fcNif">NIF <input id="fcNif" inputmode="numeric" maxlength="9"></label>
+              <label for="fcNiss">NISS <input id="fcNiss" inputmode="numeric" maxlength="11"></label>
+            </div>
+            <label for="fcEmail">Email <input id="fcEmail" type="email" maxlength="120"></label>
+            <label for="fcMorada">Morada <input id="fcMorada" maxlength="250"></label>
+            <button class="btn" id="btnFicha">Guardar ficha</button>
+            <p class="muted small">Mudar o telemóvel muda a palavra-passe de entrada desta pessoa. O email recebe as respostas aos pedidos.</p>
+          </div>
+        </div>
+      </details>
+      <div class="panel"><h2>Avisos de falta</h2><div id="gAvisos"><p class="muted">A carregar…</p></div></div>
       <div class="panel"><h2>Pedidos de correção de picagem</h2><div id="gCorr"><p class="muted">A carregar…</p></div></div>
       <div class="panel">
         <h2>Registar picagem por um colaborador</h2>
@@ -320,7 +374,7 @@ a.link { color: var(--ink); font-weight: 500; }
   function falha(e) {
     var m = (e && e.message) || String(e);
     m = m.replace(/^Exception:\s*/, '').replace(/^Error:\s*/, '');
-    if (/sessão terminou/i.test(m)) { store(KEY, null); token = null; mostrarLogin(); }
+    if (/sessão terminou/i.test(m)) { store(KEY, null); store('pgm.estado', null); token = null; mostrarLogin(); }
     toast(m);
   }
 
@@ -332,8 +386,19 @@ a.link { color: var(--ink); font-weight: 500; }
   function mostrar(v) { ['vLoading', 'vLogin', 'vApp'].forEach(function (id) { $(id).hidden = id !== v; }); $('btnSair').hidden = v !== 'vApp'; }
   function mostrarLogin() { mostrar('vLogin'); setTimeout(function () { $('lNome').focus(); }, 50); }
 
-  function aplicar(s) {
-    estado = s; offset = s.agora - Date.now(); tick();
+  // Último estado guardado no telemóvel: a app mostra-o logo ao abrir e atualiza a seguir.
+  var KEY_EST = 'pgm.estado';
+  function guardarEstado(s) { try { localStorage.setItem(KEY_EST, JSON.stringify({ t: token, s: s })); } catch (e) {} }
+  function estadoGuardado() { try { var x = JSON.parse(localStorage.getItem(KEY_EST) || 'null'); return x && x.t === token ? x.s : null; } catch (e) { return null; } }
+  var aAtualizar = false;
+  function marcarAtualizar(on) {
+    aAtualizar = on;
+    ['btnEntrada', 'btnSaida', 'btnMudar'].forEach(function (id) { var b = $(id); if (b) b.disabled = on; });
+    $('ola').classList.toggle('muted', on);
+  }
+
+  function aplicar(s, doCache) {
+    estado = s; if (!doCache) { offset = s.agora - Date.now(); guardarEstado(s); } tick();
     $('ola').innerHTML = 'Olá, <b>' + esc(s.nome) + '</b>' + (s.gestor ? ' · gestor' : '');
     $('tabGestao').hidden = !s.gestor;
     $('gBadge').hidden = !s.feriasPendentes; $('gBadge').textContent = s.feriasPendentes || ''; document.querySelector('.tabs').classList.toggle('g', !!s.gestor);
@@ -376,7 +441,7 @@ a.link { color: var(--ink); font-weight: 500; }
     }).then(function () { b.disabled = false; });
   });
   $('btnSair').addEventListener('click', function () {
-    run('sair', token).catch(function () {}); store(KEY, null); token = null; mostrarLogin();
+    run('sair', token).catch(function () {}); store(KEY, null); store('pgm.estado', null); token = null; mostrarLogin();
   });
 
   // Localização: lida no momento da picagem; o servidor decide se está perto da obra.
@@ -468,8 +533,8 @@ a.link { color: var(--ink); font-weight: 500; }
     var b = ev.target.closest('button[data-tab]'); if (!b) return;
     document.querySelectorAll('.tabs button').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); });
     ['picar', 'meus', 'ferias', 'gestao'].forEach(function (t) { $('t' + t.charAt(0).toUpperCase() + t.slice(1)).hidden = b.dataset.tab !== t; });
-    if (b.dataset.tab === 'ferias') carregarFerias();
-    if (b.dataset.tab === 'meus') { carregarMeus(); carregarCorrecoes(); }
+    if (b.dataset.tab === 'ferias') carregarPedidos();
+    if (b.dataset.tab === 'meus') carregarMeus();
     if (b.dataset.tab === 'gestao') carregarGestao();
   });
 
@@ -590,6 +655,7 @@ a.link { color: var(--ink); font-weight: 500; }
     }).join('') : '<p class="muted">Sem faltas neste mês.</p>';
     desenharFeriasGestao();
     desenharCorrGestao();
+    desenharAvisosGestao();
     ['pmColab'].forEach(function (id) { var cur = $(id).value; $(id).innerHTML = '<option value="">Escolha…</option>' + G.colaboradores.map(function (c) { return '<option>' + esc(c.nome) + '</option>'; }).join(''); if (cur) $(id).value = cur; });
     var po = $('pmObra').value; $('pmObra').innerHTML = '<option value="">Escolha…</option>' + G.obras.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join(''); if (po) $('pmObra').value = po;
     if (estado) $('pmData').max = estado.hoje.data;
@@ -677,7 +743,7 @@ a.link { color: var(--ink); font-weight: 500; }
       var x = r.saldo[a] || { periodos: 0, dias: 0 };
       return '<div class="tile"><span>Férias ' + a + '</span><b>' + Math.max(0, r.diasAno - x.dias) + ' dias</b> <span>disponíveis · ' + x.dias + ' de ' + r.diasAno + ' usados</span></div>';
     }).join('');
-    var pend = r.pedidos.filter(function (p) { return p.estado === 'Pendente'; }).length;
+    var pend = r.pedidos.filter(function (p) { return p.estado === 'Pendente'; }).length + (AVS || []).filter(function (a) { return a.estado === 'Pendente'; }).length;
     $('fBadge').hidden = !pend; $('fBadge').textContent = pend;
     $('fLista').innerHTML = r.pedidos.length ? r.pedidos.map(function (p) {
       return '<div class="rec"><div class="top"><span>' + esc(p.de) + ' – ' + esc(p.ate) + '</span><span class="st ' + esc(p.estado) + '">' + esc(p.estado) + '</span></div>' +
@@ -722,7 +788,7 @@ a.link { color: var(--ink); font-weight: 500; }
   // Férias (gestor)
   function desenharFeriasGestao() {
     var f = G.ferias;
-    var nPend = f.pendentes.length + (G.correcoes ? G.correcoes.length : 0);
+    var nPend = f.pendentes.length + (G.correcoes ? G.correcoes.length : 0) + (G.avisos ? G.avisos.length : 0);
     $('gBadge').hidden = !nPend; $('gBadge').textContent = nPend;
     var html = f.pendentes.length ? f.pendentes.map(function (p) {
       return '<div class="rec"><div class="top"><span>' + esc(p.colaborador) + '</span><span class="st Pendente">Pendente</span></div>' +
@@ -753,6 +819,135 @@ a.link { color: var(--ink); font-weight: 500; }
     run('marcarFerias', token, $('mfColab').value, $('mfDe').value, $('mfAte').value, $('mfNota').value).then(function () {
       toast('Férias marcadas para ' + $('mfColab').value); $('mfDe').value = ''; $('mfAte').value = ''; $('mfNota').value = ''; carregarGestao();
     }).catch(falha).then(function () { b.disabled = false; });
+  });
+
+  // Pedidos: um só pedido ao servidor para férias, correções e avisos
+  function carregarPedidos() {
+    if (estado) {
+      $('cData').max = estado.hoje.data;
+      var cur = $('cObra').value;
+      $('cObra').innerHTML = '<option value="">Escolha…</option>' + estado.obras.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('');
+      if (cur) $('cObra').value = cur;
+    }
+    run('meusPedidos', token).then(function (r) { desenharAvisos(r.avisos); desenharCorrecoes(r.correcoes); desenharFerias(r.ferias); }).catch(falha);
+  }
+
+  // Pedidos: escolher o tipo
+  document.querySelector('.seg').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.segb'); if (!b) return;
+    document.querySelectorAll('.segb').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); $(x.dataset.p).hidden = x !== b; });
+  });
+
+  // Avisos de falta (colaborador)
+  var AVS = [], avEdit = null;
+  function carregarAvisos() { run('meusAvisos', token).then(desenharAvisos).catch(falha); }
+  function limparAviso() {
+    avEdit = null; ['avDe', 'avAte', 'avDet'].forEach(function (id) { $(id).value = ''; }); $('avMotivo').value = '';
+    $('btnAviso').textContent = 'Enviar aviso'; $('btnAvisoCancel').hidden = true; $('aTitulo').textContent = 'Avisar que vou faltar';
+  }
+  function desenharAvisos(r) {
+    AVS = r.avisos;
+    $('avDe').min = r.hoje; $('avAte').min = r.hoje;
+    var cur = $('avMotivo').value;
+    $('avMotivo').innerHTML = '<option value="">Escolha…</option>' + r.motivos.map(function (m) { return '<option>' + esc(m) + '</option>'; }).join('');
+    if (cur) $('avMotivo').value = cur;
+    var pend = AVS.filter(function (a) { return a.estado === 'Pendente'; }).length + (F ? F.pedidos.filter(function (p) { return p.estado === 'Pendente'; }).length : 0);
+    $('fBadge').hidden = !pend; $('fBadge').textContent = pend;
+    $('avLista').innerHTML = AVS.length ? '<h2 style="margin-top:6px">Os meus avisos</h2>' + AVS.map(function (a) {
+      var est = a.estado === 'Aprovado' ? 'Justificada' : a.estado === 'Recusado' ? 'Injustificada' : a.estado;
+      return '<div class="rec"><div class="top"><span>' + esc(a.de) + (a.ate !== a.de ? ' – ' + esc(a.ate) : '') + '</span><span class="st ' + esc(a.estado) + '">' + esc(est) + '</span></div>' +
+        '<div class="muted small">' + esc(a.motivo) + (a.detalhe ? ' · ' + esc(a.detalhe) : '') + '</div>' +
+        (a.decididoPor ? '<div class="muted small">Decidido por ' + esc(a.decididoPor) + (a.nota ? ': ' + esc(a.nota) : '') + '</div>' : '') +
+        (a.estado === 'Pendente' ? '<div class="row2" style="margin-top:6px"><button class="btn sec avAlt" data-id="' + esc(a.id) + '">Alterar</button><button class="btn sec avCan" data-id="' + esc(a.id) + '">Cancelar aviso</button></div>' : '') + '</div>';
+    }).join('') : '';
+  }
+  $('avDe').addEventListener('change', function () { if ($('avAte').value && $('avAte').value < $('avDe').value) $('avAte').value = ''; });
+  $('btnAviso').addEventListener('click', function () {
+    if (!$('avDe').value) return toast('Escolha o dia em que vai faltar.');
+    if (!$('avMotivo').value) return toast('Escolha o motivo.');
+    var b = this; b.disabled = true; var era = avEdit;
+    run('avisarFalta', token, avEdit || '', $('avDe').value, $('avAte').value || $('avDe').value, $('avMotivo').value, $('avDet').value).then(function (r) {
+      limparAviso(); desenharAvisos(r); toast(era ? 'Aviso alterado' : 'Aviso enviado ao escritório');
+    }).catch(falha).then(function () { b.disabled = false; });
+  });
+  $('btnAvisoCancel').addEventListener('click', limparAviso);
+  $('avLista').addEventListener('click', function (ev) {
+    var a = ev.target.closest('.avAlt'), c = ev.target.closest('.avCan');
+    if (a) {
+      var x = AVS.find(function (y) { return y.id === a.dataset.id; }); if (!x) return;
+      avEdit = x.id; $('avDe').value = x.deIso; $('avAte').value = x.ateIso !== x.deIso ? x.ateIso : ''; $('avMotivo').value = x.motivo; $('avDet').value = x.detalhe;
+      $('btnAviso').textContent = 'Guardar alteração'; $('btnAvisoCancel').hidden = false; $('aTitulo').textContent = 'Alterar aviso de ' + x.de;
+      $('aTitulo').scrollIntoView({ behavior: 'smooth' });
+    }
+    if (c) { c.disabled = true; run('cancelarAviso', token, c.dataset.id).then(function (r) { toast('Aviso cancelado'); desenharAvisos(r); }).catch(falha); }
+  });
+
+  // Gestor: avisos de falta
+  function desenharAvisosGestao() {
+    var html = G.avisos.length ? G.avisos.map(function (a) {
+      return '<div class="rec"><div class="top"><span>' + esc(a.colaborador) + '</span><span class="st Pendente">Pendente</span></div>' +
+        '<div><b>' + esc(a.de) + (a.ate !== a.de ? ' – ' + esc(a.ate) : '') + '</b> · ' + esc(a.motivo) + '</div>' +
+        (a.detalhe ? '<div class="muted small">' + esc(a.detalhe) + '</div>' : '') + '<div class="muted small">Avisado em ' + esc(a.pedido) + '</div>' +
+        '<div class="acts" data-id="' + esc(a.id) + '"><input class="avN" placeholder="Nota (opcional)" aria-label="Nota"><button class="btn avOk">Justificada</button><button class="btn sec avNo">Injustificada</button></div></div>';
+    }).join('') : '<p class="muted">Sem avisos por decidir.</p>';
+    if (G.avisosProximos && G.avisosProximos.length) html += '<div class="rec"><div class="muted small"><b>Faltas justificadas a seguir:</b> ' +
+      G.avisosProximos.map(function (a) { return esc(a.colaborador) + ' ' + esc(a.de) + (a.ate !== a.de ? '–' + esc(a.ate) : ''); }).join(' · ') + '</div></div>';
+    $('gAvisos').innerHTML = html;
+  }
+  $('gAvisos').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.avOk, .avNo'); if (!b) return;
+    var box = b.closest('.acts'), ok = b.classList.contains('avOk');
+    box.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+    run('decidirAviso', token, box.dataset.id, ok, box.querySelector('.avN').value).then(function () {
+      toast(ok ? 'Falta justificada' : 'Falta marcada como injustificada'); carregarGestao();
+    }).catch(function (e) { falha(e); box.querySelectorAll('button').forEach(function (x) { x.disabled = false; }); });
+  });
+
+  // Os meus dados (colaborador)
+  function dp(d) { return d ? d.split('-').reverse().join('/') : '—'; }
+  $('dados').addEventListener('toggle', function () {
+    if (!this.open) return;
+    $('dFixos').innerHTML = '<p class="muted">A carregar…</p>';
+    run('meusDados', token).then(mostrarDados).catch(falha);
+  });
+  function mostrarDados(d) {
+    $('dFixos').innerHTML = [['Nome completo', d.nomeCompleto || d.nome], ['Data de nascimento', dp(d.nascimento)], ['NIF', d.nif || '—'], ['NISS', d.niss || '—'], ['Telemóvel', d.telefone || '—']]
+      .map(function (x) { return '<div><span class="muted">' + x[0] + ':</span> <b>' + esc(x[1]) + '</b></div>'; }).join('');
+    $('dEmail').value = d.email || ''; $('dMorada').value = d.morada || '';
+  }
+  $('btnDados').addEventListener('click', function () {
+    var b = this; b.disabled = true;
+    run('atualizarMeusDados', token, $('dEmail').value, $('dMorada').value).then(function (d) { mostrarDados(d); toast('Dados guardados'); })
+      .catch(falha).then(function () { b.disabled = false; });
+  });
+
+  // Fichas (gestor)
+  var FICHAS = [];
+  $('gFichas').addEventListener('toggle', function () {
+    if (!this.open) return;
+    run('fichas', token).then(function (l) { FICHAS = l; listarFichas(); }).catch(falha);
+  });
+  function listarFichas() {
+    var cur = $('fcColab').value;
+    $('fcColab').innerHTML = '<option value="">Escolha…</option>' + FICHAS.map(function (f) {
+      var falta = !f.nif || !f.niss || !f.email || !f.nascimento || !f.morada;
+      return '<option value="' + esc(f.nome) + '">' + esc(f.nome) + (f.ativo ? '' : ' (inativo)') + (falta ? ' · incompleta' : '') + '</option>';
+    }).join('');
+    if (cur) { $('fcColab').value = cur; abrirFicha(); }
+  }
+  function abrirFicha() {
+    var f = FICHAS.find(function (x) { return x.nome === $('fcColab').value; });
+    $('fcForm').hidden = !f; if (!f) return;
+    $('fcNome').value = f.nomeCompleto || ''; $('fcNasc').value = f.nascimento || ''; $('fcTel').value = f.telefone || '';
+    $('fcNif').value = f.nif || ''; $('fcNiss').value = f.niss || ''; $('fcEmail').value = f.email || ''; $('fcMorada').value = f.morada || '';
+  }
+  $('fcColab').addEventListener('change', abrirFicha);
+  $('btnFicha').addEventListener('click', function () {
+    var nome = $('fcColab').value; if (!nome) return;
+    var b = this; b.disabled = true;
+    run('guardarFicha', token, nome, { nomeCompleto: $('fcNome').value, nascimento: $('fcNasc').value, telefone: $('fcTel').value,
+      nif: $('fcNif').value, niss: $('fcNiss').value, email: $('fcEmail').value, morada: $('fcMorada').value })
+      .then(function (l) { FICHAS = l; listarFichas(); toast('Ficha de ' + nome + ' guardada'); }).catch(falha).then(function () { b.disabled = false; });
   });
 
   // Gestor: correções e picagem manual
@@ -786,10 +981,12 @@ a.link { color: var(--ink); font-weight: 500; }
 
   // Arranque
   token = load(KEY);
+  var guardado = token && estadoGuardado();
+  if (guardado) { aplicar(guardado, true); marcarAtualizar(true); }
   run('iniciar', token).then(function (s) {
-    offset = s.agora - Date.now(); tick();
+    offset = s.agora - Date.now(); tick(); marcarAtualizar(false);
     if (s.nome) aplicar(s); else { store(KEY, null); token = null; mostrarLogin(); }
-  }).catch(function (e) { mostrarLogin(); falha(e); });
+  }).catch(function (e) { marcarAtualizar(false); if (!guardado) mostrarLogin(); falha(e); });
 })();
 </script>
 <script>
