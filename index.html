@@ -165,6 +165,16 @@ a.link { color: var(--ink); font-weight: 500; }
         <label for="sNota">Nota (opcional)
           <input id="sNota" maxlength="300" placeholder="Ex.: fiquei a acabar a betonagem">
         </label>
+        <div id="hojeObras" class="small muted" hidden></div>
+        <details id="mudar">
+          <summary style="cursor:pointer;font-weight:500">Mudei de obra</summary>
+          <div style="display:grid;gap:10px;margin-top:10px">
+            <p class="muted small">Use quando chegar a outra obra durante o dia. A picagem desta obra fecha agora e começa outra na obra onde está.</p>
+            <label for="mObra">Obra onde chegou <select id="mObra"></select></label>
+            <p class="small" id="mLocal" aria-live="polite"></p>
+            <button class="btn sec" id="btnMudar">Cheguei a esta obra</button>
+          </div>
+        </details>
         <p class="small" id="sLocal" aria-live="polite"></p>
         <button class="btn azul" id="btnSaida">Registar saída</button>
         <p class="muted small">A hora de saída é a hora oficial do sistema no momento em que carrega no botão.</p>
@@ -336,6 +346,13 @@ a.link { color: var(--ink); font-weight: 500; }
       $('aObra').textContent = a.obra;
       $('aDesde').textContent = 'Entrada às ' + a.entrada + ' · ' + a.data + ' · ' + a.tipo;
       $('aEsq').hidden = !a.esquecida;
+      $('mudar').hidden = a.esquecida;
+      var outras = s.obras.filter(function (o) { return o !== a.obra; }), mcur = $('mObra').value;
+      $('mObra').innerHTML = '<option value="">Escolha…</option>' + outras.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('');
+      if (mcur && outras.indexOf(mcur) >= 0) $('mObra').value = mcur;
+      var hj = (s.hojeObras || []);
+      $('hojeObras').hidden = hj.length < 2;
+      $('hojeObras').innerHTML = 'Hoje: ' + hj.map(function (t) { return esc(t.obra) + ' ' + esc(t.entrada) + '–' + (esc(t.saida) || 'agora'); }).join(' · ');
       $('aHorario').textContent = 'Horário ' + s.horario + '. O almoço é descontado automaticamente.';
       $('btnSaida').textContent = a.esquecida ? 'Fechar picagem (sem hora de saída)' : 'Registar saída';
     } else {
@@ -396,6 +413,24 @@ a.link { color: var(--ink); font-weight: 500; }
     if (!obra || !estado || !(estado.obrasGeo || []).some(function (x) { return x.nome === obra; })) { el.textContent = ''; return; }
     el.className = 'small muted'; el.textContent = 'A ler a sua localização…';
     lerLocal().then(function (loc) { mostrarDistancia(el, obra, loc); });
+  });
+  $('mObra').addEventListener('change', function () {
+    var obra = this.value, el = $('mLocal');
+    if (!obra || !estado || !(estado.obrasGeo || []).some(function (x) { return x.nome === obra; })) { el.textContent = ''; return; }
+    el.className = 'small muted'; el.textContent = 'A ler a sua localização…';
+    lerLocal().then(function (loc) { mostrarDistancia(el, obra, loc); });
+  });
+  $('btnMudar').addEventListener('click', function () {
+    var obra = $('mObra').value; if (!obra) return toast('Escolha a obra onde chegou.');
+    var b = this; b.disabled = true; b.textContent = 'A ler a localização…';
+    lerLocal().then(function (loc) {
+      mostrarDistancia($('mLocal'), obra, loc);
+      b.textContent = 'A registar…';
+      return run('mudarObra', token, obra, loc);
+    }).then(function (s) {
+      $('mudar').open = false; $('mObra').value = ''; $('mLocal').textContent = ''; aplicar(s);
+      toast('Chegada a ' + obra + ' registada às ' + s.aberta.entrada);
+    }).catch(erroLocal).then(function () { b.disabled = false; b.textContent = 'Cheguei a esta obra'; });
   });
   function erroLocal(e) {
     falha(e);
