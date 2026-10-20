@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "pt.grupomendes.picagem",
+        "sha256_cert_fingerprints": ["43:36:C6:B1:A1:13:74:40:DF:31:A0:7F:86:A3:ED:06:63:CB:DE:B7:65:EE:D7:0D:BE:37:14:27:7F:FC:96:9A"]
+      }
+    }]
