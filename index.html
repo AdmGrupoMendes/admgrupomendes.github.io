@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Picagem · Grupo Mendes</title>
+<meta name="theme-color" content="#345042">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Picagem">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script src="config.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+<style>
+/* Cores e tipografia do brandbook Grupo Mendes (Agência Mosca, 2025). */
+:root {
+  --bg: #f2ebe6; --surface: #ffffff; --ink: #152f4e; --muted: #6b6457; --line: #e0d6c4;
+  --taupe: #b2a491; --verde: #345042; --verde-ink: #ffffff; --azul: #152f4e; --azul-ink: #ffffff;
+  --band: #345042; --band-ink: #f2ebe6; --chip: #ece3d6; --ok: #345042; --warn: #9a6a1f; --bad: #a8322a;
+  --f: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16241e; --surface: #1f3229; --ink: #f2ebe6; --muted: #b2a491; --line: #34493f;
+    --verde: #e0d6c4; --verde-ink: #16241e; --azul: #f2ebe6; --azul-ink: #16241e;
+    --band: #0f1d33; --chip: #2a4036; --ok: #8fc2a4; --warn: #e0b56a; --bad: #ef8a80; color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--f); -webkit-text-size-adjust: 100%; }
+.band { background: var(--band); color: var(--band-ink); }
+header { max-width: 560px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left)); }
+.brand { display: flex; align-items: center; gap: 12px; }
+.mark { width: 64px; fill: #b2a491; flex: none; }
+.wm { line-height: 1; }
+.wm small { display: block; font-size: .58rem; letter-spacing: .42em; text-transform: uppercase; margin-bottom: 3px; }
+.wm span { display: block; font-weight: 300; font-size: 1.45rem; }
+.app { font-size: .66rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: #b2a491; margin-top: 5px; }
+.exit { background: transparent; color: #e0d6c4; border: 1px solid #b2a491; border-radius: 6px; padding: 6px 10px; font: 500 .8rem var(--f); cursor: pointer; }
+main { max-width: 560px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); display: grid; gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
+h1, h2 { margin: 0; font-weight: 500; }
+h2 { font-size: 1.15rem; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .86rem; }
+label { display: grid; gap: 5px; font-size: .78rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+input, select { font: 400 1.05rem var(--f); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 13px 12px; width: 100%; min-width: 0; }
+button { font-family: var(--f); }
+:focus-visible { outline: 3px solid var(--taupe); outline-offset: 2px; }
+.btn { border: 0; border-radius: 8px; padding: 16px; font-size: 1.1rem; font-weight: 500; letter-spacing: .03em; cursor: pointer; width: 100%; background: var(--verde); color: var(--verde-ink); }
+.btn.azul { background: var(--azul); color: var(--azul-ink); }
+.btn:disabled { opacity: .55; cursor: wait; }
+.clock { font-weight: 300; font-size: 3.4rem; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.chip { display: inline-block; font-size: .74rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; background: var(--chip); }
+.chip.fer { background: #b2a491; color: #152f4e; }
+.onsite { border-left: 6px solid var(--ok); }
+.live { color: var(--ok); font-weight: 500; }
+.err { color: var(--bad); font-weight: 500; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.tabs button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 11px; border-radius: 8px; font-size: .95rem; font-weight: 500; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--verde); color: var(--verde-ink); border-color: var(--verde); }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+#fSaldo { grid-template-columns: 1fr 1fr; }
+.tile { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; min-width: 0; }
+.tile span { display: block; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.tile b { font-size: 1.15rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.rec { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 4px; }
+.rec:first-child { border-top: 0; padding-top: 0; }
+.rec .top { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-weight: 500; }
+.rec .h { font-variant-numeric: tabular-nums; }
+.flag { color: var(--warn); font-weight: 500; }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom)); background: var(--azul); color: var(--azul-ink);
+  padding: 12px 18px; border-radius: 8px; font-weight: 500; max-width: calc(100% - 32px); z-index: 9; text-align: center; }
+[hidden] { display: none !important; }
+.tabs.g { grid-template-columns: repeat(4, 1fr); }
+.tabs button { padding-inline: 4px; }
+.badge { display: inline-block; min-width: 1.4em; margin-left: 4px; padding: 0 5px; border-radius: 999px; background: var(--bad); color: #fff; font-size: .72rem; line-height: 1.4em; }
+.st { display: inline-block; font-size: .72rem; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; background: var(--chip); }
+.st.Aprovado { background: var(--verde); color: var(--verde-ink); }
+.st.Pendente { background: #e0b56a; color: #152f4e; }
+.st.Recusado { background: var(--bad); color: #fff; }
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.acts input { grid-column: 1 / -1; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row2:has(> .btn[hidden]) { grid-template-columns: 1fr; }
+.tw { overflow-x: auto; margin: 0 -4px; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+tfoot td { font-weight: 500; background: var(--bg); }
+.btn.sec { background: var(--chip); color: var(--ink); font-size: .95rem; padding: 11px; }
+.fix { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.fix .btn.sec { grid-column: auto; }
+
+a.link { color: var(--ink); font-weight: 500; }
+@media (max-width: 360px) { .tiles { grid-template-columns: 1fr 1fr; } .clock { font-size: 2.8rem; } }
+</style>
+</head>
+<body>
+<div class="band">
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="269 208 375 94" aria-hidden="true"><path d="M570.77 208.39c-7.43 0-14.54 2.95-19.79 8.2l-6.14 6.14v-5.01c0-5.15-4.18-9.33-9.33-9.33h-63.04c-7.43 0-14.54 2.95-19.79 8.2l-6.14 6.14v-5.01c0-5.15-4.18-9.33-9.33-9.33h-63.04c-7.43 0-14.54 2.95-19.79 8.2l-85.1 85.1h72.37c7.43 0 14.54-2.95 19.79-8.2l70.67-70.66c2.35-2.35 6.37-.69 6.37 2.64v5.33l-70.9 70.89h72.38c7.42 0 14.54-2.95 19.79-8.2l70.66-70.66c2.35-2.35 6.37-.69 6.37 2.64v5.33l-70.89 70.89h72.37c7.43 0 14.54-2.95 19.79-8.2l85.1-85.1z"/></svg>
+      <div>
+        <h1 class="wm"><small>Grupo</small><span>Mendes</span></h1>
+        <div class="app">Picagem de Obras</div>
+      </div>
+    </div>
+    <button class="exit" id="btnSair" hidden>Sair</button>
+  </header>
+</div>
+
+<main>
+  <section class="panel" id="vLoading"><p class="muted">A abrir…</p></section>
+
+  <!-- Login -->
+  <section class="panel" id="vLogin" hidden>
+    <div><h2>Entrar</h2><p class="muted small">Use o seu nome e o seu número de telemóvel.</p></div>
+    <form id="fLogin" style="display:grid;gap:14px" autocomplete="on">
+      <label for="lNome">Nome
+        <input id="lNome" name="username" autocomplete="username" autocapitalize="words" required placeholder="Ex.: Fernando Mampasi">
+      </label>
+      <label for="lTel">Telemóvel
+        <input id="lTel" name="password" type="password" inputmode="numeric" autocomplete="current-password" required placeholder="9 dígitos">
+      </label>
+      <p class="err small" id="lErr" hidden></p>
+      <button class="btn" id="btnLogin" type="submit">Entrar</button>
+    </form>
+    <p class="muted small">Não consegue entrar? Fale com o escritório para confirmar o seu nome e telemóvel.</p>
+  </section>
+
+  <!-- App -->
+  <div id="vApp" hidden style="display:grid;gap:14px">
+    <p class="muted" id="ola"></p>
+    <nav class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="picar">Picar</button>
+      <button role="tab" aria-selected="false" data-tab="meus">Registos</button>
+      <button role="tab" aria-selected="false" data-tab="ferias">Férias<span class="badge" id="fBadge" hidden></span></button>
+      <button role="tab" aria-selected="false" data-tab="gestao" id="tabGestao" hidden>Gestão<span class="badge" id="gBadge" hidden></span></button>
+    </nav>
+
+    <section id="tPicar" style="display:grid;gap:14px">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:end;gap:10px;flex-wrap:wrap">
+          <div><p class="muted small" id="hojeTxt"></p><div class="clock" id="clock">--:--</div></div>
+          <span class="chip" id="hojeTipo"></span>
+        </div>
+      </div>
+
+      <div class="panel onsite" id="pAberta" hidden>
+        <p class="live">● Em obra</p>
+        <h2 id="aObra"></h2>
+        <p class="muted" id="aDesde"></p>
+        <p class="err small" id="aEsq" hidden>Esta picagem ficou aberta desde outro dia. Feche-a e o escritório corrige a hora de saída.</p>
+        <p class="muted small" id="aHorario"></p>
+        <label for="sNota">Nota (opcional)
+          <input id="sNota" maxlength="300" placeholder="Ex.: fiquei a acabar a betonagem">
+        </label>
+        <p class="small" id="sLocal" aria-live="polite"></p>
+        <button class="btn azul" id="btnSaida">Registar saída</button>
+        <p class="muted small">A hora de saída é a hora oficial do sistema no momento em que carrega no botão.</p>
+      </div>
+
+      <div class="panel" id="pEntrada" hidden>
+        <h2>Registar entrada</h2>
+        <label for="eObra">Obra <select id="eObra"></select></label>
+        <p class="small" id="eLocal" aria-live="polite"></p>
+        <button class="btn" id="btnEntrada">Registar entrada</button>
+        <p class="muted small">A hora de entrada é a hora oficial do sistema no momento em que carrega no botão. Não pode ser alterada. Para picar tem de estar perto da obra: o telemóvel vai pedir autorização para usar a localização.</p>
+      </div>
+    </section>
+
+    <section id="tMeus" hidden style="display:grid;gap:14px">
+      <div class="panel">
+        <h2 id="cTitulo">Esqueceu-se de picar?</h2>
+        <p class="muted small">Peça ao gestor para registar o dia. Só conta depois de aprovado.</p>
+        <div class="row2">
+          <label for="cData">Dia <input id="cData" type="date"></label>
+          <label for="cObra">Obra <select id="cObra"></select></label>
+        </div>
+        <div class="row2">
+          <label for="cEnt">Entrada <input id="cEnt" type="time"></label>
+          <label for="cSai">Saída <input id="cSai" type="time"></label>
+        </div>
+        <label for="cMotivo">Motivo <input id="cMotivo" maxlength="300" placeholder="Ex.: fiquei sem bateria no telemóvel"></label>
+        <div class="row2"><button class="btn" id="btnCorr">Enviar ao gestor</button><button class="btn sec" id="btnCorrCancel" hidden>Cancelar alteração</button></div>
+        <div id="cLista"></div>
+      </div>
+      <div class="panel">
+        <label for="mMes">Mês <input id="mMes" type="month"></label>
+        <div class="tiles" id="mTiles"></div>
+      </div>
+      <div class="panel" id="mLista"><p class="muted">A carregar…</p></div>
+    </section>
+
+    <section id="tFerias" hidden style="display:grid;gap:14px">
+      <div class="panel">
+        <h2>Pedir férias</h2>
+        <p class="muted small" id="fRegras"></p>
+        <div class="tiles" id="fSaldo"></div>
+        <div class="row2">
+          <label for="fDe">Primeiro dia <input id="fDe" type="date"></label>
+          <label for="fAte">Último dia <input id="fAte" type="date"></label>
+        </div>
+        <p class="small" id="fDias"></p>
+        <label for="fObs">Observação (opcional) <input id="fObs" maxlength="300" placeholder="Ex.: viagem marcada"></label>
+        <div class="row2"><button class="btn" id="btnPedir">Pedir férias</button><button class="btn sec" id="btnPedirCancel" hidden>Cancelar alteração</button></div>
+        <p class="muted small">O pedido fica pendente até o gestor aprovar. Só depois os dias contam como férias.</p>
+      </div>
+      <div class="panel"><h2>Os meus pedidos</h2><div id="fLista"><p class="muted">A carregar…</p></div></div>
+    </section>
+
+    <section id="tGestao" hidden style="display:grid;gap:14px">
+      <div class="panel">
+        <div class="row2">
+          <label for="gMes">Mês <input id="gMes" type="month"></label>
+          <label for="gColab">Colaborador <select id="gColab"></select></label>
+        </div>
+        <label for="gObra">Obra <select id="gObra"></select></label>
+        <div class="tiles" id="gTiles"></div>
+        <button class="btn" id="btnRel">Gerar relatório do mês</button>
+        <p class="small" id="relLink" hidden></p>
+        <button class="btn sec" id="btnEnviar">Aprovar e enviar à contabilidade</button>
+        <div id="envConfirm" hidden style="display:grid;gap:8px">
+          <p class="small">Confirma que o mês está correto? O PDF deste mês segue agora para o email da contabilidade indicado na folha Definições.</p>
+          <div class="row2"><button class="btn" id="envSim">Sim, enviar</button><button class="btn sec" id="envNao">Cancelar</button></div>
+        </div>
+        <p class="muted small">No último dia útil, às 20h, o PDF segue sozinho para a contabilidade se não houver erros. Se houver, recebe um email para rever e aprovar aqui.</p>
+      </div>
+      <div class="panel" id="gPend" hidden style="border-left:6px solid var(--bad)">
+        <h2 class="err">Relatório por aprovar</h2>
+        <p class="small" id="gPendTxt"></p>
+      </div>
+      <div class="panel"><h2>Pedidos de correção de picagem</h2><div id="gCorr"><p class="muted">A carregar…</p></div></div>
+      <div class="panel">
+        <h2>Registar picagem por um colaborador</h2>
+        <p class="muted small">Para quem se esqueceu de picar. Escolha as horas que quiser; deixe a saída vazia se a pessoa ainda estiver em obra.</p>
+        <div class="row2">
+          <label for="pmColab">Colaborador <select id="pmColab"></select></label>
+          <label for="pmData">Dia <input id="pmData" type="date"></label>
+        </div>
+        <label for="pmObra">Obra <select id="pmObra"></select></label>
+        <div class="row2">
+          <label for="pmEnt">Entrada <input id="pmEnt" type="time"></label>
+          <label for="pmSai">Saída <input id="pmSai" type="time"></label>
+        </div>
+        <label for="pmNota">Nota (opcional) <input id="pmNota" maxlength="200" placeholder="Ex.: esqueceu-se de picar"></label>
+        <button class="btn" id="btnPm">Registar picagem</button>
+      </div>
+      <div class="panel"><h2>Pedidos de férias</h2><div id="gFerias"><p class="muted">A carregar…</p></div></div>
+      <div class="panel">
+        <h2>Marcar férias a um colaborador</h2>
+        <p class="muted small">Ficam logo aprovadas. Pode usar qualquer data (sem os 3 meses de antecedência), mantendo o máximo de 15 dias seguidos e os dias disponíveis no ano.</p>
+        <label for="mfColab">Colaborador <select id="mfColab"></select></label>
+        <div class="row2">
+          <label for="mfDe">Primeiro dia <input id="mfDe" type="date"></label>
+          <label for="mfAte">Último dia <input id="mfAte" type="date"></label>
+        </div>
+        <label for="mfNota">Nota (opcional) <input id="mfNota" maxlength="300" placeholder="Ex.: férias coletivas de agosto"></label>
+        <button class="btn" id="btnMarcar">Marcar férias</button>
+      </div>
+      <div class="panel"><h2>Faltas do mês</h2><div id="gFaltas"><p class="muted">A carregar…</p></div>
+        <p class="muted small">Dias úteis sem nenhuma picagem. Férias, doença e faltas justificadas registam-se no separador Ausências da folha.</p></div>
+      <div class="panel"><h2>Agora em obra</h2><div id="gAgora"><p class="muted">A carregar…</p></div></div>
+      <div class="panel"><h2>Por colaborador</h2><div class="tw"><table id="gColabT"></table></div></div>
+      <div class="panel"><h2>Por obra</h2><div class="tw"><table id="gObraT"></table></div></div>
+      <div class="panel"><h2>Todas as picagens</h2><div id="gLista"></div></div>
+    </section>
+  </div>
+</main>
+<div id="toast" hidden></div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'pgm.token', KEY_OBRA = 'pgm.obra';
+  var token = null, offset = 0, estado = null;
+
+  function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function toast(m) { var t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 3500); }
+  function fmtH(h) { var min = Math.round((h || 0) * 60), hh = Math.floor(min / 60), mm = min % 60; return mm ? hh + 'h' + (mm < 10 ? '0' : '') + mm : hh + 'h'; }
+
+  // Dentro do Google (link /exec) usa google.script.run; na app instalada fala com a API (doPost) por fetch.
+  function run(fn) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    if (window.google && google.script && google.script.run) {
+      return new Promise(function (ok, ko) {
+        google.script.run.withSuccessHandler(ok).withFailureHandler(ko)[fn].apply(null, args);
+      });
+    }
+    if (!window.API_URL || !/^https:\/\/script\.google\.com\//.test(window.API_URL)) {
+      return Promise.reject(new Error('A app ainda não está ligada ao servidor. Falta o endereço /exec no ficheiro config.js.'));
+    }
+    return fetch(window.API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) })
+      .catch(function () { throw new Error('Sem ligação à internet. Verifique a rede e tente outra vez.'); })
+      .then(function (r) { if (!r.ok) throw new Error('O servidor não respondeu (erro ' + r.status + '). Tente outra vez.'); return r.json(); })
+      .then(function (j) { if (!j.ok) throw new Error(j.error); return j.data; });
+  }
+  function falha(e) {
+    var m = (e && e.message) || String(e);
+    m = m.replace(/^Exception:\s*/, '').replace(/^Error:\s*/, '');
+    if (/sessão terminou/i.test(m)) { store(KEY, null); token = null; mostrarLogin(); }
+    toast(m);
+  }
+
+  // Relógio com a hora do servidor (Lisboa), não a do telemóvel.
+  var fHora = new Intl.DateTimeFormat('pt-PT', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit', hour12: false });
+  function tick() { $('clock').textContent = fHora.format(new Date(Date.now() + offset)); }
+  setInterval(tick, 10000);
+
+  function mostrar(v) { ['vLoading', 'vLogin', 'vApp'].forEach(function (id) { $(id).hidden = id !== v; }); $('btnSair').hidden = v !== 'vApp'; }
+  function mostrarLogin() { mostrar('vLogin'); setTimeout(function () { $('lNome').focus(); }, 50); }
+
+  function aplicar(s) {
+    estado = s; offset = s.agora - Date.now(); tick();
+    $('ola').innerHTML = 'Olá, <b>' + esc(s.nome) + '</b>' + (s.gestor ? ' · gestor' : '');
+    $('tabGestao').hidden = !s.gestor;
+    $('gBadge').hidden = !s.feriasPendentes; $('gBadge').textContent = s.feriasPendentes || ''; document.querySelector('.tabs').classList.toggle('g', !!s.gestor);
+    var d = s.hoje.data.split('-');
+    $('hojeTxt').textContent = s.hoje.dia + ', ' + d[2] + '/' + d[1] + '/' + d[0];
+    $('hojeTipo').textContent = s.hoje.tipo; $('hojeTipo').className = 'chip' + (s.hoje.tipo === 'Feriado' ? ' fer' : '');
+    var a = s.aberta;
+    $('pAberta').hidden = !a; $('pEntrada').hidden = !!a;
+    if (a) {
+      $('aObra').textContent = a.obra;
+      $('aDesde').textContent = 'Entrada às ' + a.entrada + ' · ' + a.data + ' · ' + a.tipo;
+      $('aEsq').hidden = !a.esquecida;
+      $('aHorario').textContent = 'Horário ' + s.horario + '. O almoço é descontado automaticamente.';
+      $('btnSaida').textContent = a.esquecida ? 'Fechar picagem (sem hora de saída)' : 'Registar saída';
+    } else {
+      var last = load(KEY_OBRA), cur = $('eObra').value || last;
+      $('eObra').innerHTML = s.obras.length
+        ? '<option value="">Escolha a obra…</option>' + s.obras.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('')
+        : '<option value="">Ainda não há obras — fale com o escritório</option>';
+      if (cur && s.obras.indexOf(cur) >= 0) $('eObra').value = cur;
+    }
+    mostrar('vApp');
+  }
+
+  // Login
+  $('fLogin').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var b = $('btnLogin'); b.disabled = true; $('lErr').hidden = true;
+    run('login', $('lNome').value, $('lTel').value).then(function (s) {
+      token = s.token; store(KEY, token); $('lTel').value = ''; aplicar(s);
+    }).catch(function (e) {
+      $('lErr').textContent = ((e && e.message) || String(e)).replace(/^(Exception|Error):\s*/, ''); $('lErr').hidden = false;
+    }).then(function () { b.disabled = false; });
+  });
+  $('btnSair').addEventListener('click', function () {
+    run('sair', token).catch(function () {}); store(KEY, null); token = null; mostrarLogin();
+  });
+
+  // Localização: lida no momento da picagem; o servidor decide se está perto da obra.
+  var locErro = null;
+  function lerLocal() {
+    return new Promise(function (ok) {
+      locErro = null;
+      if (!navigator.geolocation) { locErro = 'O navegador não permite ler a localização.'; return ok(null); }
+      navigator.geolocation.getCurrentPosition(function (p) {
+        ok({ lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) });
+      }, function (e) {
+        locErro = e.code === 1 ? 'A localização está bloqueada. Toque no cadeado ao lado do endereço (ou nas definições do navegador), permita a Localização e tente outra vez.'
+          : e.code === 3 ? 'A localização demorou demasiado. Ative o GPS e tente outra vez.' : 'Não foi possível ler a localização. Ative o GPS do telemóvel.';
+        ok(null);
+      }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+    });
+  }
+  function distM(a, b, c, d) {
+    var R = 6371000, r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r;
+    var h = Math.sin(x / 2) * Math.sin(x / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) * Math.sin(y / 2);
+    return Math.round(2 * R * Math.asin(Math.sqrt(h)));
+  }
+  function dTxt(m) { return m >= 1000 ? (Math.round(m / 100) / 10).toString().replace('.', ',') + ' km' : m + ' m'; }
+  function mostrarDistancia(el, obra, loc) {
+    var o = estado && (estado.obrasGeo || []).find(function (x) { return x.nome === obra; });
+    if (!o) { el.className = 'small muted'; el.textContent = ''; return; }
+    if (!loc) { el.className = 'small err'; el.textContent = locErro || ''; return; }
+    var d = distM(loc.lat, loc.lng, o.lat, o.lng), perto = d <= o.raio;
+    el.className = 'small ' + (perto ? 'live' : 'err');
+    el.textContent = perto ? 'Está a ' + dTxt(d) + ' da obra. Pode picar.' : 'Está a ' + dTxt(d) + ' da obra. Só pode picar a menos de ' + dTxt(o.raio) + '.';
+  }
+  $('eObra').addEventListener('change', function () {
+    var obra = this.value, el = $('eLocal');
+    if (!obra || !estado || !(estado.obrasGeo || []).some(function (x) { return x.nome === obra; })) { el.textContent = ''; return; }
+    el.className = 'small muted'; el.textContent = 'A ler a sua localização…';
+    lerLocal().then(function (loc) { mostrarDistancia(el, obra, loc); });
+  });
+  function erroLocal(e) {
+    falha(e);
+    if (locErro) setTimeout(function () { toast(locErro); }, 3600);
+  }
+
+  // Picar
+  $('btnEntrada').addEventListener('click', function () {
+    var obra = $('eObra').value; if (!obra) return toast('Escolha a obra.');
+    var b = this; b.disabled = true; store(KEY_OBRA, obra);
+    b.textContent = 'A ler a localização…';
+    lerLocal().then(function (loc) {
+      mostrarDistancia($('eLocal'), obra, loc);
+      b.textContent = 'A registar…';
+      return run('registarEntrada', token, obra, loc);
+    }).then(function (s) { aplicar(s); $('eLocal').textContent = ''; toast('Entrada registada às ' + s.aberta.entrada); })
+      .catch(erroLocal).then(function () { b.disabled = false; b.textContent = 'Registar entrada'; });
+  });
+  $('btnSaida').addEventListener('click', function () {
+    var b = this, txt = b.textContent; b.disabled = true;
+    b.textContent = 'A ler a localização…';
+    lerLocal().then(function (loc) {
+      if (estado && estado.aberta) mostrarDistancia($('sLocal'), estado.aberta.obra, loc);
+      b.textContent = 'A registar…';
+      return run('registarSaida', token, 0, $('sNota').value, loc);
+    }).then(function (s) {
+      $('sLocal').textContent = ''; b.textContent = txt;
+      $('sNota').value = ''; aplicar(s);
+      toast('Saída registada às ' + fHora.format(new Date(Date.now() + offset)) + '. Bom descanso!');
+    }).catch(erroLocal).then(function () { b.disabled = false; if (/^A /.test(b.textContent)) b.textContent = txt; });
+  });
+
+  // Tabs
+  document.querySelector('.tabs').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-tab]'); if (!b) return;
+    document.querySelectorAll('.tabs button').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); });
+    ['picar', 'meus', 'ferias', 'gestao'].forEach(function (t) { $('t' + t.charAt(0).toUpperCase() + t.slice(1)).hidden = b.dataset.tab !== t; });
+    if (b.dataset.tab === 'ferias') carregarFerias();
+    if (b.dataset.tab === 'meus') { carregarMeus(); carregarCorrecoes(); }
+    if (b.dataset.tab === 'gestao') carregarGestao();
+  });
+
+  // Os meus registos
+  function carregarMeus() {
+    if (!$('mMes').value && estado) $('mMes').value = estado.hoje.data.slice(0, 7);
+    $('mLista').innerHTML = '<p class="muted">A carregar…</p>';
+    run('meusRegistos', token, $('mMes').value).then(function (r) {
+      var t = { total: 0, normais: 0, extra: 0, sabado: 0, domingo: 0, feriado: 0 }, dias = {};
+      r.lista.forEach(function (p) { for (var k in t) t[k] += p[k]; if (p.total) dias[p.data] = 1; });
+      $('mTiles').innerHTML = [['Total', fmtH(t.total)], ['Normais', fmtH(t.normais)], ['Extra', fmtH(t.extra)],
+        ['Sábado', fmtH(t.sabado)], ['Domingo', fmtH(t.domingo)], ['Feriado', fmtH(t.feriado)], ['Dias', Object.keys(dias).length], ['Faltas', r.faltas.length]]
+        .map(function (x) { return '<div class="tile"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('');
+      var aviso = (r.faltas.length ? '<div class="rec"><div class="top"><span class="err">Faltas (dias úteis sem picagem)</span><span class="err">' + r.faltas.length + '</span></div><div class="muted small">' + r.faltas.map(esc).join(', ') + '</div><div class="muted small">Se estava a trabalhar ou de férias, fale com o escritório.</div></div>' : '') +
+        r.ausencias.map(function (a) { return '<div class="rec"><div class="top"><span>' + esc(a.motivo) + '</span><span>' + esc(a.data) + '</span></div></div>'; }).join('');
+      $('mLista').innerHTML = aviso + (r.lista.length ? r.lista.map(function (p) {
+        var est = p.estado === 'Em obra' ? '<span class="flag">em obra</span>' : p.estado === 'Falta saída' ? '<span class="flag">falta saída</span>' : '<span class="h">' + fmtH(p.total) + '</span>';
+        return '<div class="rec"><div class="top"><span>' + esc(p.data) + ' · ' + esc(p.dia) + '</span>' + est + '</div>' +
+          '<div>' + esc(p.obra) + '</div>' +
+          '<div class="muted small">' + esc(p.entrada) + ' – ' + (esc(p.saida) || '…') + (p.pausa ? ' · pausa ' + p.pausa + ' min' : '') + ' · ' + esc(p.tipo) +
+          (p.extra || p.sabado || p.domingo || p.feriado ? ' · extra ' + fmtH(p.extra + p.sabado + p.domingo + p.feriado) : '') + '</div>' +
+          (p.nota ? '<div class="muted small">' + esc(p.nota) + '</div>' : '') + '</div>';
+      }).join('') : '<p class="muted">Sem picagens neste mês.</p>');
+    }).catch(falha);
+  }
+  $('mMes').addEventListener('change', carregarMeus);
+
+  // Pedidos de correção (colaborador)
+  var C = [], cEdit = null;
+  function carregarCorrecoes() {
+    if (estado) {
+      $('cData').max = estado.hoje.data;
+      var cur = $('cObra').value;
+      $('cObra').innerHTML = '<option value="">Escolha…</option>' + estado.obras.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('');
+      if (cur) $('cObra').value = cur;
+    }
+    run('minhasCorrecoes', token).then(desenharCorrecoes).catch(falha);
+  }
+  function limparCorr() {
+    cEdit = null; ['cData', 'cEnt', 'cSai', 'cMotivo'].forEach(function (id) { $(id).value = ''; });
+    $('btnCorr').textContent = 'Enviar ao gestor'; $('btnCorrCancel').hidden = true; $('cTitulo').textContent = 'Esqueceu-se de picar?';
+  }
+  function desenharCorrecoes(lista) {
+    C = lista;
+    $('cLista').innerHTML = lista.length ? '<h2 style="margin-top:6px">Os meus pedidos de correção</h2>' + lista.map(function (p) {
+      return '<div class="rec"><div class="top"><span>' + esc(p.data) + ' · ' + esc(p.entrada) + '–' + esc(p.saida) + '</span><span class="st ' + esc(p.estado) + '">' + esc(p.estado) + '</span></div>' +
+        '<div class="muted small">' + esc(p.obra) + ' · ' + esc(p.motivo) + '</div>' +
+        (p.decididoPor ? '<div class="muted small">' + esc(p.estado) + ' por ' + esc(p.decididoPor) + (p.nota ? ': ' + esc(p.nota) : '') + '</div>' : '') +
+        (p.estado === 'Pendente' ? '<div class="row2" style="margin-top:6px"><button class="btn sec cAlt" data-id="' + esc(p.id) + '">Alterar</button><button class="btn sec cCan" data-id="' + esc(p.id) + '">Cancelar pedido</button></div>' : '') + '</div>';
+    }).join('') : '';
+  }
+  $('btnCorr').addEventListener('click', function () {
+    var b = this; b.disabled = true;
+    run('pedirCorrecao', token, cEdit || '', $('cData').value, $('cObra').value, $('cEnt').value, $('cSai').value, $('cMotivo').value).then(function (l) {
+      toast(cEdit ? 'Pedido alterado' : 'Pedido enviado ao gestor'); limparCorr(); desenharCorrecoes(l);
+    }).catch(falha).then(function () { b.disabled = false; });
+  });
+  $('btnCorrCancel').addEventListener('click', limparCorr);
+  $('cLista').addEventListener('click', function (ev) {
+    var a = ev.target.closest('.cAlt'), c = ev.target.closest('.cCan');
+    if (a) {
+      var p = C.find(function (x) { return x.id === a.dataset.id; }); if (!p) return;
+      cEdit = p.id; $('cData').value = p.dataIso; $('cObra').value = p.obra; $('cEnt').value = p.entrada; $('cSai').value = p.saida; $('cMotivo').value = p.motivo;
+      $('btnCorr').textContent = 'Guardar alteração'; $('btnCorrCancel').hidden = false; $('cTitulo').textContent = 'Alterar pedido de ' + p.data;
+      $('cTitulo').scrollIntoView({ behavior: 'smooth' });
+    }
+    if (c) { c.disabled = true; run('cancelarCorrecao', token, c.dataset.id).then(function (l) { toast('Pedido cancelado'); desenharCorrecoes(l); }).catch(falha); }
+  });
+
+  // Gestão (só gestores)
+  var G = null;
+  function soma(ps) {
+    var t = { n: 0, total: 0, normais: 0, extra: 0, sabado: 0, domingo: 0, feriado: 0, dias: {}, falta: 0 };
+    ps.forEach(function (p) {
+      t.n++; ['total', 'normais', 'extra', 'sabado', 'domingo', 'feriado'].forEach(function (k) { t[k] += p[k]; });
+      if (p.total) t.dias[p.colaborador + p.data] = 1;
+      if (p.estado !== 'Concluído') t.falta++;
+    });
+    return t;
+  }
+  function opcoes(sel, lista, todos) {
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">' + todos + '</option>' + lista.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('');
+    if (lista.indexOf(cur) >= 0) sel.value = cur;
+  }
+  function carregarGestao() {
+    if (!$('gMes').value && estado) $('gMes').value = estado.hoje.data.slice(0, 7);
+    $('gLista').innerHTML = '<p class="muted">A carregar…</p>';
+    run('gestao', token, $('gMes').value).then(function (r) { G = r; desenharGestao(); }).catch(falha);
+  }
+  function desenharGestao() {
+    if (!G) return;
+    var nomesMes = G.lista.map(function (p) { return p.colaborador; });
+    var nomes = G.colaboradores.map(function (c) { return c.nome; }).concat(nomesMes).filter(function (x, i, a) { return a.indexOf(x) === i; }).sort();
+    var obras = G.obras.concat(G.lista.map(function (p) { return p.obra; })).filter(function (x, i, a) { return x && a.indexOf(x) === i; }).sort();
+    opcoes($('gColab'), nomes, 'Todos'); opcoes($('gObra'), obras, 'Todas');
+    var fc = $('gColab').value, fo = $('gObra').value;
+    var l = G.lista.filter(function (p) { return (!fc || p.colaborador === fc) && (!fo || p.obra === fo); });
+    var t = soma(l);
+    $('gTiles').innerHTML = [['Total', fmtH(t.total)], ['Normais', fmtH(t.normais)], ['Extra', fmtH(t.extra)],
+      ['Sábado', fmtH(t.sabado)], ['Domingo', fmtH(t.domingo)], ['Feriado', fmtH(t.feriado)], ['Picagens', t.n], ['Dias', Object.keys(t.dias).length], ['Por corrigir', t.falta]]
+      .map(function (x) { return '<div class="tile"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('');
+
+    $('gAgora').innerHTML = G.emObra.length ? G.emObra.map(function (p) {
+      return '<div class="rec"><div class="top"><span>' + esc(p.colaborador) + '</span>' + (p.esquecida ? '<span class="flag">esqueceu a saída</span>' : '<span class="live">desde ' + esc(p.entrada) + '</span>') + '</div>' +
+        '<div class="muted small">' + esc(p.obra) + ' · ' + esc(p.data) + '</div></div>';
+    }).join('') : '<p class="muted">Ninguém em obra neste momento.</p>';
+
+    var porC = {};
+    Object.keys(G.faltas).forEach(function (n) { if (!fc || n === fc) porC[n] = []; });
+    l.forEach(function (p) { (porC[p.colaborador] = porC[p.colaborador] || []).push(p); });
+    var fl = Object.keys(G.faltas).filter(function (n) { return (!fc || n === fc) && (G.faltas[n].faltas.length || G.faltas[n].ausencias.length); }).sort();
+    $('gFaltas').innerHTML = fl.length ? fl.map(function (n) {
+      var f = G.faltas[n], dp = function (d) { return d.split('-').reverse().join('/'); };
+      return '<div class="rec"><div class="top"><span>' + esc(n) + '</span>' + (f.faltas.length ? '<span class="err">' + f.faltas.length + ' falta' + (f.faltas.length > 1 ? 's' : '') + '</span>' : '') + '</div>' +
+        (f.faltas.length ? '<div class="muted small">' + f.faltas.map(dp).join(', ') + '</div>' : '') +
+        f.ausencias.map(function (a) { return '<div class="muted small">' + esc(a.motivo) + ': ' + dp(a.data) + '</div>'; }).join('') + '</div>';
+    }).join('') : '<p class="muted">Sem faltas neste mês.</p>';
+    desenharFeriasGestao();
+    desenharCorrGestao();
+    ['pmColab'].forEach(function (id) { var cur = $(id).value; $(id).innerHTML = '<option value="">Escolha…</option>' + G.colaboradores.map(function (c) { return '<option>' + esc(c.nome) + '</option>'; }).join(''); if (cur) $(id).value = cur; });
+    var po = $('pmObra').value; $('pmObra').innerHTML = '<option value="">Escolha…</option>' + G.obras.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join(''); if (po) $('pmObra').value = po;
+    if (estado) $('pmData').max = estado.hoje.data;
+    var mc = $('mfColab').value;
+    $('mfColab').innerHTML = '<option value="">Escolha…</option>' + G.colaboradores.map(function (c) { return '<option>' + esc(c.nome) + '</option>'; }).join('');
+    if (mc) $('mfColab').value = mc;
+    $('gPend').hidden = !G.pendente;
+    if (G.pendente) $('gPendTxt').textContent = 'O relatório de ' + G.pendente.mes + ' não foi enviado à contabilidade porque tem ' + G.pendente.resumo + '. Corrija o que for preciso e carregue em "Aprovar e enviar à contabilidade" com esse mês escolhido.';
+    var linhasC = Object.keys(porC).sort().map(function (n) {
+      var x = soma(porC[n]);
+      var nf = G.faltas[n] ? G.faltas[n].faltas.length : 0;
+      return '<tr><td>' + esc(n) + '</td><td class="n">' + Object.keys(x.dias).length + '</td><td class="n">' + fmtH(x.normais) + '</td><td class="n">' + fmtH(x.extra) +
+        '</td><td class="n">' + fmtH(x.sabado) + '</td><td class="n">' + fmtH(x.domingo) + '</td><td class="n">' + fmtH(x.feriado) + '</td><td class="n"><b>' + fmtH(x.total) + '</b></td><td class="n' + (nf ? ' err' : '') + '">' + nf + '</td></tr>';
+    }).join('');
+    $('gColabT').innerHTML = '<thead><tr><th>Colaborador</th><th class="n">Dias</th><th class="n">Normais</th><th class="n">Extra</th><th class="n">Sáb.</th><th class="n">Dom.</th><th class="n">Fer.</th><th class="n">Total</th><th class="n">Faltas</th></tr></thead><tbody>' +
+      (linhasC || '<tr><td colspan="9" class="muted">Sem picagens.</td></tr>') + '</tbody>' +
+      (linhasC ? '<tfoot><tr><td>Total</td><td></td><td class="n">' + fmtH(t.normais) + '</td><td class="n">' + fmtH(t.extra) + '</td><td class="n">' + fmtH(t.sabado) + '</td><td class="n">' + fmtH(t.domingo) + '</td><td class="n">' + fmtH(t.feriado) + '</td><td class="n">' + fmtH(t.total) + '</td><td></td></tr></tfoot>' : '');
+
+    var porO = {}; l.forEach(function (p) { (porO[p.obra] = porO[p.obra] || []).push(p); });
+    var linhasO = Object.keys(porO).sort().map(function (o) {
+      var ps = porO[o], pess = {}; ps.forEach(function (p) { pess[p.colaborador] = 1; });
+      return '<tr><td>' + esc(o) + '</td><td class="n">' + Object.keys(pess).length + '</td><td class="n">' + ps.length + '</td><td class="n"><b>' + fmtH(soma(ps).total) + '</b></td></tr>';
+    }).join('');
+    $('gObraT').innerHTML = '<thead><tr><th>Obra</th><th class="n">Pessoas</th><th class="n">Picagens</th><th class="n">Horas</th></tr></thead><tbody>' +
+      (linhasO || '<tr><td colspan="4" class="muted">Sem picagens.</td></tr>') + '</tbody>';
+
+    $('gLista').innerHTML = l.length ? l.map(function (p) {
+      var aberta = p.estado !== 'Concluído';
+      var est = p.estado === 'Em obra' ? '<span class="flag">em obra</span>' : p.estado === 'Falta saída' ? '<span class="flag">falta saída</span>' : '<span class="h">' + fmtH(p.total) + '</span>';
+      return '<div class="rec"><div class="top"><span>' + esc(p.colaborador) + '</span>' + est + '</div>' +
+        '<div class="muted small">' + esc(p.data) + ' · ' + esc(p.dia) + ' · ' + esc(p.tipo) + ' · ' + esc(p.obra) + '</div>' +
+        '<div class="muted small">' + esc(p.entrada) + ' – ' + (esc(p.saida) || '…') + (p.pausa ? ' · pausa ' + p.pausa + ' min' : '') +
+        (p.extra || p.sabado || p.domingo || p.feriado ? ' · extra ' + fmtH(p.extra + p.sabado + p.domingo + p.feriado) : '') + '</div>' +
+        (p.localEnt || p.localSai ? '<div class="muted small">Local: ' + (p.localEnt ? 'entrada ' + esc(p.localEnt) : '') + (p.localSai ? (p.localEnt ? ' · ' : '') + 'saída ' + esc(p.localSai) : '') + '</div>' : '') +
+        (p.nota ? '<div class="muted small">' + esc(p.nota) + '</div>' : '') +
+        '<details class="ed"><summary class="small" style="cursor:pointer;margin-top:4px">' + (aberta ? '<b class="err">Corrigir</b>' : 'Editar') + '</summary>' +
+        '<div class="fix" data-id="' + esc(p.id) + '"><input type="time" aria-label="Entrada" class="fxE" value="' + esc(p.entrada) + '"><input type="time" aria-label="Saída" class="fxS" value="' + esc(p.saida) + '">' +
+        '<button class="btn sec fxB" style="grid-column:1 / -1">Guardar entrada e saída</button></div></details>' +
+        '</div>';
+    }).join('') : '<p class="muted">Sem picagens neste período.</p>';
+  }
+  $('gMes').addEventListener('change', function () { $('relLink').hidden = true; carregarGestao(); });
+  $('gColab').addEventListener('change', desenharGestao);
+  $('gObra').addEventListener('change', desenharGestao);
+  $('gLista').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.fxB'); if (!b) return;
+    var box = b.closest('.fix'), ent = box.querySelector('.fxE').value, sai = box.querySelector('.fxS').value;
+    if (!ent) return toast('Indique a hora de entrada.');
+    b.disabled = true;
+    run('editarPicagem', token, box.dataset.id, '', '', ent, sai, '').then(function () { toast('Picagem atualizada'); carregarGestao(); })
+      .catch(falha).then(function () { b.disabled = false; });
+  });
+  $('btnRel').addEventListener('click', function () {
+    var b = this; b.disabled = true; b.textContent = 'A gerar relatório…';
+    run('gerarRelatorio', token, $('gMes').value).then(function (r) {
+      $('relLink').innerHTML = 'Relatório pronto (' + r.picagens + ' picagens): <a class="link" target="_blank" rel="noopener" href="' + esc(r.url) + '">abrir ' + esc(r.nome) + '</a>. Na folha, use Ficheiro → Transferir → PDF ou Excel.';
+      $('relLink').hidden = false;
+    }).catch(falha).then(function () { b.disabled = false; b.textContent = 'Gerar relatório do mês'; });
+  });
+
+  $('btnEnviar').addEventListener('click', function () { $('envConfirm').hidden = false; this.hidden = true; });
+  $('envNao').addEventListener('click', function () { $('envConfirm').hidden = true; $('btnEnviar').hidden = false; });
+  $('envSim').addEventListener('click', function () {
+    var b = this; b.disabled = true; b.textContent = 'A enviar…';
+    run('enviarRelatorioContabilidade', token, $('gMes').value).then(function (r) {
+      toast('PDF enviado para ' + r.para.join(', ') + (r.porCorrigir ? ' (' + r.porCorrigir + ' por corrigir)' : ''));
+    }).catch(falha).then(function () {
+      b.disabled = false; b.textContent = 'Sim, enviar'; $('envConfirm').hidden = true; $('btnEnviar').hidden = false;
+    });
+  });
+
+  // Férias (colaborador)
+  var F = null;
+  function diasEntre(de, ate) { return Math.round((Date.parse(ate + 'T00:00:00Z') - Date.parse(de + 'T00:00:00Z')) / 864e5) + 1; }
+  function carregarFerias() {
+    run('feriasMinhas', token).then(desenharFerias).catch(falha);
+  }
+  function desenharFerias(r) {
+    F = r;
+    var minPt = r.minData.split('-').reverse().join('/');
+    $('fRegras').textContent = 'Tem ' + r.diasAno + ' dias de férias por ano e pode dividi-los em quantos pedidos quiser (1, 2, 11 dias…), com no máximo ' + r.maxDias + ' dias seguidos. Pedidos com ' + r.antecedencia + ' meses de antecedência: hoje só pode pedir a partir de ' + minPt + '. Para datas mais próximas, fale com o gestor.';
+    $('fDe').min = r.minData; $('fAte').min = r.minData;
+    var ano = estado ? estado.hoje.data.slice(0, 4) : String(new Date().getFullYear()), prox = String(Number(ano) + 1);
+    $('fSaldo').innerHTML = [ano, prox].map(function (a) {
+      var x = r.saldo[a] || { periodos: 0, dias: 0 };
+      return '<div class="tile"><span>Férias ' + a + '</span><b>' + Math.max(0, r.diasAno - x.dias) + ' dias</b> <span>disponíveis · ' + x.dias + ' de ' + r.diasAno + ' usados</span></div>';
+    }).join('');
+    var pend = r.pedidos.filter(function (p) { return p.estado === 'Pendente'; }).length;
+    $('fBadge').hidden = !pend; $('fBadge').textContent = pend;
+    $('fLista').innerHTML = r.pedidos.length ? r.pedidos.map(function (p) {
+      return '<div class="rec"><div class="top"><span>' + esc(p.de) + ' – ' + esc(p.ate) + '</span><span class="st ' + esc(p.estado) + '">' + esc(p.estado) + '</span></div>' +
+        '<div class="muted small">' + p.dias + ' dias · pedido em ' + esc(p.pedido) + (p.obs ? ' · ' + esc(p.obs) : '') + '</div>' +
+        (p.decididoPor ? '<div class="muted small">' + esc(p.estado) + ' por ' + esc(p.decididoPor) + ' em ' + esc(p.decididoEm) + (p.nota ? ': ' + esc(p.nota) : '') + '</div>' : '') +
+        (p.estado === 'Pendente' ? '<div class="row2" style="margin-top:6px"><button class="btn sec fAlt" data-id="' + esc(p.id) + '">Alterar datas</button><button class="btn sec fCancel" data-id="' + esc(p.id) + '">Cancelar pedido</button></div>' : '') + '</div>';
+    }).join('') : '<p class="muted">Ainda não fez nenhum pedido.</p>';
+  }
+  function mostrarDias() {
+    var de = $('fDe').value, ate = $('fAte').value;
+    if (!de || !ate) { $('fDias').textContent = ''; return; }
+    var n = diasEntre(de, ate), max = F ? F.maxDias : 15;
+    $('fDias').className = 'small' + (n < 1 || n > max ? ' err' : '');
+    $('fDias').textContent = n < 1 ? 'O último dia tem de ser depois do primeiro.' : n + ' dias seguidos' + (n > max ? ' (máximo ' + max + ')' : '');
+  }
+  $('fDe').addEventListener('change', function () { if (!$('fAte').value || $('fAte').value < $('fDe').value) $('fAte').value = $('fDe').value; mostrarDias(); });
+  $('fAte').addEventListener('change', mostrarDias);
+  var fEdit = null;
+  function limparFerias() { fEdit = null; $('fDe').value = ''; $('fAte').value = ''; $('fObs').value = ''; mostrarDias(); $('btnPedir').textContent = 'Pedir férias'; $('btnPedirCancel').hidden = true; }
+  $('btnPedirCancel').addEventListener('click', limparFerias);
+  $('btnPedir').addEventListener('click', function () {
+    var b = this; if (!$('fDe').value || !$('fAte').value) return toast('Escolha o primeiro e o último dia.');
+    b.disabled = true;
+    var pr = fEdit ? run('alterarFerias', token, fEdit, $('fDe').value, $('fAte').value, $('fObs').value) : run('pedirFerias', token, $('fDe').value, $('fAte').value, $('fObs').value);
+    var era = fEdit;
+    pr.then(function (r) { limparFerias(); desenharFerias(r); toast(era ? 'Pedido alterado' : 'Pedido enviado ao gestor'); })
+      .catch(falha).then(function () { b.disabled = false; });
+  });
+  $('fLista').addEventListener('click', function (ev) {
+    var a = ev.target.closest('.fAlt');
+    if (a) {
+      var p = F.pedidos.find(function (x) { return x.id === a.dataset.id; }); if (!p) return;
+      fEdit = p.id; $('fDe').value = p.deIso; $('fAte').value = p.ateIso; $('fObs').value = p.obs; mostrarDias();
+      $('btnPedir').textContent = 'Guardar novas datas'; $('btnPedirCancel').hidden = false; $('fDe').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    var b = ev.target.closest('.fCancel'); if (!b) return;
+    b.disabled = true;
+    run('cancelarFerias', token, b.dataset.id).then(function (r) { desenharFerias(r); toast('Pedido cancelado'); }).catch(falha);
+  });
+
+  // Férias (gestor)
+  function desenharFeriasGestao() {
+    var f = G.ferias;
+    var nPend = f.pendentes.length + (G.correcoes ? G.correcoes.length : 0);
+    $('gBadge').hidden = !nPend; $('gBadge').textContent = nPend;
+    var html = f.pendentes.length ? f.pendentes.map(function (p) {
+      return '<div class="rec"><div class="top"><span>' + esc(p.colaborador) + '</span><span class="st Pendente">Pendente</span></div>' +
+        '<div><b>' + esc(p.de) + ' – ' + esc(p.ate) + '</b> · ' + p.dias + ' dias</div>' +
+        '<div class="muted small">Pedido em ' + esc(p.pedido) + ' · ' + p.de.slice(-4) + ': ' + p.saldo.dias + ' de ' + p.diasAno + ' dias (com este)' + (p.obs ? ' · ' + esc(p.obs) : '') + '</div>' +
+        (p.ausentes.length ? '<div class="small flag">Também de férias nessas datas: ' + p.ausentes.map(esc).join(', ') + '</div>' : '') +
+        '<div class="acts" data-id="' + esc(p.id) + '"><input class="fNota" placeholder="Nota (opcional)" aria-label="Nota para o colaborador">' +
+        '<button class="btn fAprovar">Aprovar</button><button class="btn sec fRecusar">Recusar</button></div></div>';
+    }).join('') : '<p class="muted">Sem pedidos pendentes.</p>';
+    if (f.proximas.length) html += '<div class="rec"><div class="muted small"><b>Férias aprovadas a seguir:</b> ' +
+      f.proximas.map(function (p) { return esc(p.colaborador) + ' ' + esc(p.de) + '–' + esc(p.ate); }).join(' · ') + '</div></div>';
+    $('gFerias').innerHTML = html;
+  }
+  $('gFerias').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.fAprovar, .fRecusar'); if (!b) return;
+    var box = b.closest('.acts'), aprovar = b.classList.contains('fAprovar');
+    box.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+    run('decidirFerias', token, box.dataset.id, aprovar, box.querySelector('.fNota').value).then(function () {
+      toast(aprovar ? 'Férias aprovadas' : 'Pedido recusado'); carregarGestao();
+    }).catch(function (e) { falha(e); box.querySelectorAll('button').forEach(function (x) { x.disabled = false; }); });
+  });
+
+  $('mfDe').addEventListener('change', function () { if (!$('mfAte').value || $('mfAte').value < $('mfDe').value) $('mfAte').value = $('mfDe').value; });
+  $('btnMarcar').addEventListener('click', function () {
+    if (!$('mfColab').value) return toast('Escolha o colaborador.');
+    if (!$('mfDe').value || !$('mfAte').value) return toast('Escolha o primeiro e o último dia.');
+    var b = this; b.disabled = true;
+    run('marcarFerias', token, $('mfColab').value, $('mfDe').value, $('mfAte').value, $('mfNota').value).then(function () {
+      toast('Férias marcadas para ' + $('mfColab').value); $('mfDe').value = ''; $('mfAte').value = ''; $('mfNota').value = ''; carregarGestao();
+    }).catch(falha).then(function () { b.disabled = false; });
+  });
+
+  // Gestor: correções e picagem manual
+  function desenharCorrGestao() {
+    $('gCorr').innerHTML = G.correcoes.length ? G.correcoes.map(function (p) {
+      return '<div class="rec"><div class="top"><span>' + esc(p.colaborador) + '</span><span class="st Pendente">Pendente</span></div>' +
+        '<div><b>' + esc(p.data) + '</b> · ' + esc(p.obra) + '</div><div class="muted small">Motivo: ' + esc(p.motivo) + ' · pedido em ' + esc(p.pedido) + '</div>' +
+        '<div class="acts" data-id="' + esc(p.id) + '"><input type="time" class="cE" aria-label="Entrada" value="' + esc(p.entrada) + '" style="grid-column:auto"><input type="time" class="cS" aria-label="Saída" value="' + esc(p.saida) + '" style="grid-column:auto">' +
+        '<input class="cN" placeholder="Nota (opcional)" aria-label="Nota"><button class="btn cOk">Aprovar</button><button class="btn sec cNo">Recusar</button></div></div>';
+    }).join('') : '<p class="muted">Sem pedidos de correção.</p>';
+  }
+  $('gCorr').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.cOk, .cNo'); if (!b) return;
+    var box = b.closest('.acts'), ok = b.classList.contains('cOk');
+    box.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+    run('decidirCorrecao', token, box.dataset.id, ok, box.querySelector('.cN').value, box.querySelector('.cE').value, box.querySelector('.cS').value).then(function () {
+      toast(ok ? 'Correção aprovada e picagem registada' : 'Pedido recusado'); carregarGestao();
+    }).catch(function (e) { falha(e); box.querySelectorAll('button').forEach(function (x) { x.disabled = false; }); });
+  });
+  $('btnPm').addEventListener('click', function () {
+    var b = this; b.disabled = true;
+    run('picagemManual', token, $('pmColab').value, $('pmData').value, $('pmObra').value, $('pmEnt').value, $('pmSai').value, $('pmNota').value).then(function () {
+      toast('Picagem registada para ' + $('pmColab').value); ['pmData', 'pmEnt', 'pmSai', 'pmNota'].forEach(function (id) { $(id).value = ''; }); carregarGestao();
+    }).catch(falha).then(function () { b.disabled = false; });
+  });
+
+  // Ao voltar à app (por exemplo no dia seguinte), atualiza o estado e a hora.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && token) run('iniciar', token).then(function (s) { if (s.nome) aplicar(s); else { store(KEY, null); token = null; mostrarLogin(); } }).catch(function () {});
+  });
+
+  // Arranque
+  token = load(KEY);
+  run('iniciar', token).then(function (s) {
+    offset = s.agora - Date.now(); tick();
+    if (s.nome) aplicar(s); else { store(KEY, null); token = null; mostrarLogin(); }
+  }).catch(function (e) { mostrarLogin(); falha(e); });
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); }); }
+</script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+# Faz o GitHub Pages publicar a pasta .well-known (ligação da app Android ao site).
+include: [".well-known"]
