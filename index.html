@@ -282,6 +282,21 @@ a.link { color: var(--ink); font-weight: 500; }
         <h2 class="err">Relatório por aprovar</h2>
         <p class="small" id="gPendTxt"></p>
       </div>
+      <details class="panel" id="gCustos">
+        <summary style="cursor:pointer;font-weight:500;font-size:1.1rem">Custos por obra</summary>
+        <div style="display:grid;gap:12px;margin-top:12px">
+          <p class="muted small">Mês escolhido em cima. Custo = horas × custo/hora de cada colaborador. Só os gestores veem esta área.</p>
+          <div class="rec" id="cuOd"><div class="small" id="cuOdTxt"></div><button class="btn sec" id="btnCuOd" style="margin-top:6px">Atualizar custos/hora do OneDrive</button></div>
+          <p class="err small" id="cuAviso" hidden></p>
+          <div class="tiles" id="cuTiles"></div>
+          <h2>Por obra</h2><p class="muted small" style="margin-top:-6px">Horas de cada colaborador na obra × o seu custo/hora, e o total da obra.</p>
+          <div class="tw"><table id="cuObras"></table></div>
+          <h2>Por colaborador</h2><div class="tw"><table id="cuColab"></table></div>
+          <div class="row2"><button class="btn" id="btnCuFolha">Gerar folha de custos</button><button class="btn sec" id="btnCuCsv">Descarregar CSV</button></div>
+          <button class="btn sec" id="btnCuCrm">Enviar ao CRM</button>
+          <p class="small" id="cuLink" hidden></p>
+        </div>
+      </details>
       <details class="panel" id="gFichas">
         <summary style="cursor:pointer;font-weight:500;font-size:1.1rem">Fichas dos colaboradores</summary>
         <div style="display:grid;gap:10px;margin-top:12px">
@@ -298,6 +313,7 @@ a.link { color: var(--ink); font-weight: 500; }
             </div>
             <label for="fcEmail">Email <input id="fcEmail" type="email" maxlength="120"></label>
             <label for="fcMorada">Morada <input id="fcMorada" maxlength="250"></label>
+            <label for="fcCusto">Custo/hora (€) · só gestores <input id="fcCusto" inputmode="decimal" placeholder="Ex.: 12,00"></label>
             <button class="btn" id="btnFicha">Guardar ficha</button>
             <p class="muted small">Mudar o telemóvel muda a palavra-passe de entrada desta pessoa. O email recebe as respostas aos pedidos.</p>
           </div>
@@ -921,6 +937,69 @@ a.link { color: var(--ink); font-weight: 500; }
       .catch(falha).then(function () { b.disabled = false; });
   });
 
+  // Custos por obra (gestor)
+  var CU = null;
+  var eur = function (n) { return (n || 0).toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' }); };
+  function carregarCustos() {
+    if (!$('gCustos').open) return;
+    $('cuTiles').innerHTML = '<p class="muted">A calcular…</p>';
+    run('custos', token, $('gMes').value).then(function (c) { CU = c; desenharCustos(); }).catch(falha);
+  }
+  function desenharOneDrive(o) {
+    var u = o && o.ultima;
+    $('cuOdTxt').innerHTML = !o || !o.ligado ? 'Custos/hora: ligação ao OneDrive ainda não configurada (usa o valor das fichas).'
+      : 'Custos/hora lidos do OneDrive <b>Custo Operacao → Colaboradores</b>' + (u ? ' · última atualização ' + esc(u.quando) +
+        (u.semPar && u.semPar.length ? '<div class="err">No Excel mas sem correspondência na app: ' + u.semPar.map(esc).join(', ') + '</div>' : '') : ' · ainda não sincronizado');
+    $('btnCuOd').hidden = !o || !o.ligado;
+  }
+  $('btnCuOd').addEventListener('click', function () {
+    var b = this; b.disabled = true; b.textContent = 'A ler o OneDrive…';
+    run('atualizarCustosOneDrive', token).then(function (r) { toast(r.atualizados.length + ' custo(s)/hora atualizado(s)'); carregarCustos(); })
+      .catch(falha).then(function () { b.disabled = false; b.textContent = 'Atualizar custos/hora do OneDrive'; });
+  });
+  function desenharCustos() {
+    var c = CU;
+    desenharOneDrive(c.oneDrive);
+    $('cuAviso').hidden = !c.semCusto.length;
+    $('cuAviso').textContent = c.semCusto.length ? 'Sem custo/hora na ficha (contam 0 €): ' + c.semCusto.join(', ') + '. Preencha em "Fichas dos colaboradores".' : '';
+    $('cuTiles').innerHTML = [['Custo total', eur(c.total.custo)], ['Horas', fmtH(c.total.horas)], ['Obras', c.porObra.length]]
+      .map(function (x) { return '<div class="tile"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('');
+    var tab = function (rows, cab) { return '<thead><tr>' + cab + '</tr></thead><tbody>' + (rows || '<tr><td colspan="6" class="muted">Sem horas neste mês.</td></tr>') + '</tbody>'; };
+    $('cuObras').innerHTML = tab(c.porObra.map(function (o) {
+      return '<tr><td colspan="3" style="padding-top:14px"><b style="color:var(--verde)">' + esc(o.nome) + '</b></td></tr>' +
+        (o.colaboradores || []).map(function (l) {
+          return '<tr><td style="white-space:normal">' + esc(l.colaborador) + '<div class="muted small">' + fmtH(l.horas) + ' × ' + eur(l.custoHora) + '/h</div></td><td class="n">' + fmtH(l.horas) + '</td><td class="n">' + eur(l.custo) + '</td></tr>';
+        }).join('') +
+        '<tr style="background:var(--chip)"><td><b>Total da obra</b></td><td class="n"><b>' + fmtH(o.horas) + '</b></td><td class="n"><b>' + eur(o.custo) + '</b></td></tr>';
+    }).join('') + (c.porObra.length > 1 ? '<tr style="background:var(--line)"><td><b>Total de todas as obras</b></td><td class="n"><b>' + fmtH(c.total.horas) + '</b></td><td class="n"><b>' + eur(c.total.custo) + '</b></td></tr>' : ''),
+      '<th>Colaborador</th><th class="n">Horas</th><th class="n">Custo</th>');
+    $('cuColab').innerHTML = tab(c.porColaborador.map(function (o) { return '<tr><td>' + esc(o.nome) + '</td><td class="n">' + fmtH(o.horas) + '</td><td class="n"><b>' + eur(o.custo) + '</b></td></tr>'; }).join(''),
+      '<th>Colaborador</th><th class="n">Horas</th><th class="n">Custo</th>');
+  }
+  $('gCustos').addEventListener('toggle', carregarCustos);
+  $('gMes').addEventListener('change', carregarCustos);
+  $('btnCuFolha').addEventListener('click', function () {
+    var b = this; b.disabled = true;
+    run('gerarRelatorioCustos', token, $('gMes').value).then(function (r) {
+      $('cuLink').innerHTML = 'Folha pronta: <a class="link" target="_blank" rel="noopener" href="' + esc(r.url) + '">abrir ' + esc(r.nome) + '</a> (Ficheiro → Transferir → Excel ou PDF).';
+      $('cuLink').hidden = false;
+    }).catch(falha).then(function () { b.disabled = false; });
+  });
+  $('btnCuCsv').addEventListener('click', function () {
+    if (!CU) return toast('Abra primeiro os custos do mês.');
+    var q = function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }, num = function (n) { return String(n).replace('.', ','); };
+    var linhas = [['Mês', 'Obra', 'Colaborador', 'Horas', 'Custo/hora (€)', 'Custo (€)']].concat(CU.linhas.map(function (l) { return [CU.mes, l.obra, l.colaborador, num(l.horas), num(l.custoHora), num(l.custo)]; }));
+    var csv = '\ufeff' + linhas.map(function (r) { return r.map(q).join(';'); }).join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'custos-obras-' + CU.mes + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+  });
+  $('btnCuCrm').addEventListener('click', function () {
+    var b = this; b.disabled = true;
+    run('enviarCustosCRM', token, $('gMes').value).then(function (r) { toast(r.enviados + ' linhas enviadas ao CRM'); })
+      .catch(falha).then(function () { b.disabled = false; });
+  });
+
   // Fichas (gestor)
   var FICHAS = [];
   $('gFichas').addEventListener('toggle', function () {
@@ -940,13 +1019,14 @@ a.link { color: var(--ink); font-weight: 500; }
     $('fcForm').hidden = !f; if (!f) return;
     $('fcNome').value = f.nomeCompleto || ''; $('fcNasc').value = f.nascimento || ''; $('fcTel').value = f.telefone || '';
     $('fcNif').value = f.nif || ''; $('fcNiss').value = f.niss || ''; $('fcEmail').value = f.email || ''; $('fcMorada').value = f.morada || '';
+    $('fcCusto').value = f.custoHora ? String(f.custoHora).replace('.', ',') : '';
   }
   $('fcColab').addEventListener('change', abrirFicha);
   $('btnFicha').addEventListener('click', function () {
     var nome = $('fcColab').value; if (!nome) return;
     var b = this; b.disabled = true;
     run('guardarFicha', token, nome, { nomeCompleto: $('fcNome').value, nascimento: $('fcNasc').value, telefone: $('fcTel').value,
-      nif: $('fcNif').value, niss: $('fcNiss').value, email: $('fcEmail').value, morada: $('fcMorada').value })
+      nif: $('fcNif').value, niss: $('fcNiss').value, email: $('fcEmail').value, morada: $('fcMorada').value, custoHora: $('fcCusto').value })
       .then(function (l) { FICHAS = l; listarFichas(); toast('Ficha de ' + nome + ' guardada'); }).catch(falha).then(function () { b.disabled = false; });
   });
 
