@@ -134,18 +134,18 @@ a.link { color: var(--ink); font-weight: 500; }
 
   <!-- Login -->
   <section class="panel" id="vLogin" hidden>
-    <div><h2>Entrar</h2><p class="muted small">Use o seu nome e o seu número de telemóvel.</p></div>
+    <div><h2>Entrar</h2><p class="muted small">Use o seu nome e a senha que o escritório lhe deu.</p></div>
     <form id="fLogin" style="display:grid;gap:14px" autocomplete="on">
       <label for="lNome">Nome
         <input id="lNome" name="username" autocomplete="username" autocapitalize="words" required placeholder="Ex.: Fernando Mampasi">
       </label>
-      <label for="lTel">Telemóvel
-        <input id="lTel" name="password" type="password" inputmode="numeric" autocomplete="current-password" required placeholder="9 dígitos">
+      <label for="lTel">Senha
+        <input id="lTel" name="password" type="password" autocomplete="current-password" required placeholder="A sua senha">
       </label>
       <p class="err small" id="lErr" hidden></p>
       <button class="btn" id="btnLogin" type="submit">Entrar</button>
     </form>
-    <p class="muted small">Não consegue entrar? Fale com o escritório para confirmar o seu nome e telemóvel.</p>
+    <p class="muted small">Não consegue entrar? Fale com o escritório para confirmar o seu nome e a sua senha.</p>
   </section>
 
   <!-- App -->
@@ -327,6 +327,10 @@ a.link { color: var(--ink); font-weight: 500; }
                 <label for="fcTel">Telemóvel <input id="fcTel" inputmode="numeric" maxlength="13"></label>
               </div>
               <div class="row2">
+                <label for="fcSenha">Senha de entrada <input id="fcSenha" maxlength="40" autocomplete="off" placeholder="Vazia = telemóvel"></label>
+                <span></span>
+              </div>
+              <div class="row2">
                 <label for="fcNif">NIF <input id="fcNif" inputmode="numeric" maxlength="9"></label>
                 <label for="fcNiss">NISS <input id="fcNiss" inputmode="numeric" maxlength="11"></label>
               </div>
@@ -334,7 +338,7 @@ a.link { color: var(--ink); font-weight: 500; }
               <label for="fcMorada">Morada <input id="fcMorada" maxlength="250"></label>
               <label for="fcCusto">Custo/hora (€) · só gestores <input id="fcCusto" inputmode="decimal" placeholder="Ex.: 12,00"></label>
               <button class="btn" id="btnFicha">Guardar ficha</button>
-              <p class="muted small">Mudar o telemóvel muda a palavra-passe de entrada desta pessoa. O email recebe as respostas aos pedidos.</p>
+              <p class="muted small">A pessoa entra com o nome e a <b>senha</b>. Se a senha estiver vazia, a senha é o número de telemóvel. Ao mudar a senha, a pessoa tem de entrar outra vez com a nova. O email recebe as respostas aos pedidos.</p>
             </div>
           </div>
         </details>
@@ -1067,13 +1071,14 @@ a.link { color: var(--ink); font-weight: 500; }
     $('fcNome').value = f.nomeCompleto || ''; $('fcNasc').value = f.nascimento || ''; $('fcTel').value = f.telefone || '';
     $('fcNif').value = f.nif || ''; $('fcNiss').value = f.niss || ''; $('fcEmail').value = f.email || ''; $('fcMorada').value = f.morada || '';
     $('fcCusto').value = f.custoHora ? String(f.custoHora).replace('.', ',') : '';
+    $('fcSenha').value = f.senha || '';
   }
   $('fcColab').addEventListener('change', abrirFicha);
   $('btnFicha').addEventListener('click', function () {
     var nome = $('fcColab').value; if (!nome) return;
     var b = this; b.disabled = true;
     run('guardarFicha', token, nome, { nomeCompleto: $('fcNome').value, nascimento: $('fcNasc').value, telefone: $('fcTel').value,
-      nif: $('fcNif').value, niss: $('fcNiss').value, email: $('fcEmail').value, morada: $('fcMorada').value, custoHora: $('fcCusto').value })
+      nif: $('fcNif').value, niss: $('fcNiss').value, email: $('fcEmail').value, morada: $('fcMorada').value, custoHora: $('fcCusto').value, senha: $('fcSenha').value })
       .then(function (l) { FICHAS = l; listarFichas(); toast('Ficha de ' + nome + ' guardada'); }).catch(falha).then(function () { b.disabled = false; });
   });
 
