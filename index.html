@@ -92,6 +92,13 @@ button { font-family: var(--f); }
 .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .segb { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 6px; border-radius: 8px; font: 500 .86rem var(--f); cursor: pointer; }
 .segb[aria-pressed="true"] { background: var(--azul); color: var(--azul-ink); border-color: var(--azul); }
+.mudarBox { display: grid; gap: 10px; border: 2px solid var(--azul); border-radius: 12px; padding: 14px; background: var(--chip); }
+.mudarBox h2 { margin: 0; color: var(--azul); }
+.fimDia { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 14px; }
+.fimDia h2 { margin: 0; font-size: 1rem; }
+.seg.g5 { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.seg.g5 .segb { font-size: .76rem; padding: 11px 2px; position: relative; }
+.seg.g5 .badge { position: absolute; top: -6px; right: -4px; margin: 0; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .row2:has(> .btn[hidden]) { grid-template-columns: 1fr; }
 .tw { overflow-x: auto; margin: 0 -4px; }
@@ -115,7 +122,7 @@ a.link { color: var(--ink); font-weight: 500; }
       <svg class="mark" viewBox="269 208 375 94" aria-hidden="true"><path d="M570.77 208.39c-7.43 0-14.54 2.95-19.79 8.2l-6.14 6.14v-5.01c0-5.15-4.18-9.33-9.33-9.33h-63.04c-7.43 0-14.54 2.95-19.79 8.2l-6.14 6.14v-5.01c0-5.15-4.18-9.33-9.33-9.33h-63.04c-7.43 0-14.54 2.95-19.79 8.2l-85.1 85.1h72.37c7.43 0 14.54-2.95 19.79-8.2l70.67-70.66c2.35-2.35 6.37-.69 6.37 2.64v5.33l-70.9 70.89h72.38c7.42 0 14.54-2.95 19.79-8.2l70.66-70.66c2.35-2.35 6.37-.69 6.37 2.64v5.33l-70.89 70.89h72.37c7.43 0 14.54-2.95 19.79-8.2l85.1-85.1z"/></svg>
       <div>
         <h1 class="wm"><small>Grupo</small><span>Mendes</span></h1>
-        <div class="app">Picagem de Obras</div>
+        <div class="app">Controle de Horas</div>
       </div>
     </div>
     <button class="exit" id="btnSair" hidden>Sair</button>
@@ -165,22 +172,23 @@ a.link { color: var(--ink); font-weight: 500; }
         <p class="muted" id="aDesde"></p>
         <p class="err small" id="aEsq" hidden>Esta picagem ficou aberta desde outro dia. Feche-a e o escritório corrige a hora de saída.</p>
         <p class="muted small" id="aHorario"></p>
-        <label for="sNota">Nota (opcional)
-          <input id="sNota" maxlength="300" placeholder="Ex.: fiquei a acabar a betonagem">
-        </label>
         <div id="hojeObras" class="small muted" hidden></div>
-        <details id="mudar">
-          <summary style="cursor:pointer;font-weight:500">Mudei de obra</summary>
-          <div style="display:grid;gap:10px;margin-top:10px">
-            <p class="muted small">Use quando chegar a outra obra durante o dia. A picagem desta obra fecha agora e começa outra na obra onde está.</p>
-            <label for="mObra">Obra onde chegou <select id="mObra"></select></label>
-            <p class="small" id="mLocal" aria-live="polite"></p>
-            <button class="btn sec" id="btnMudar">Cheguei a esta obra</button>
-          </div>
-        </details>
-        <p class="small" id="sLocal" aria-live="polite"></p>
-        <button class="btn azul" id="btnSaida">Registar saída</button>
-        <p class="muted small">A hora de saída é a hora oficial do sistema no momento em que carrega no botão.</p>
+        <div class="mudarBox" id="mudar">
+          <h2>⇄ Mudar de obra</h2>
+          <p class="small">Chegou a outra obra durante o dia? Use <b>este botão</b>. <b>Não</b> registe saída nem nova entrada.</p>
+          <label for="mObra">Obra onde chegou <select id="mObra"></select></label>
+          <p class="small" id="mLocal" aria-live="polite"></p>
+          <button class="btn azul" id="btnMudar">Mudar de obra</button>
+        </div>
+        <div class="fimDia">
+          <h2>Terminei o dia</h2>
+          <label for="sNota">Nota (opcional)
+            <input id="sNota" maxlength="300" placeholder="Ex.: fiquei a acabar a betonagem">
+          </label>
+          <p class="small" id="sLocal" aria-live="polite"></p>
+          <button class="btn sec" id="btnSaida">Registar saída</button>
+          <p class="muted small" id="sRegra">A hora de saída é a hora oficial do sistema. Saída antes do fim do horário vai para aprovação da gestão; depois do fim do horário conta até essa hora e o resto vai como pedido de horas extra.</p>
+        </div>
       </div>
 
       <div class="panel" id="pEntrada" hidden>
@@ -219,6 +227,7 @@ a.link { color: var(--ink); font-weight: 500; }
       <div class="panel" id="pFalta">
         <h2 id="aTitulo">Avisar que vou faltar</h2>
         <p class="muted small">O aviso vai por email para o escritório. Se for aprovado, conta como falta justificada.</p>
+        <p class="small" id="avRegra"></p>
         <div class="row2">
           <label for="avDe">Dia <input id="avDe" type="date"></label>
           <label for="avAte">Até (opcional) <input id="avAte" type="date"></label>
@@ -268,92 +277,113 @@ a.link { color: var(--ink); font-weight: 500; }
           <label for="gColab">Colaborador <select id="gColab"></select></label>
         </div>
         <label for="gObra">Obra <select id="gObra"></select></label>
-        <div class="tiles" id="gTiles"></div>
-        <button class="btn" id="btnRel">Gerar relatório do mês</button>
-        <p class="small" id="relLink" hidden></p>
-        <button class="btn sec" id="btnEnviar">Aprovar e enviar à contabilidade</button>
-        <div id="envConfirm" hidden style="display:grid;gap:8px">
-          <p class="small">Confirma que o mês está correto? O PDF deste mês segue agora para o email da contabilidade indicado na folha Definições.</p>
-          <div class="row2"><button class="btn" id="envSim">Sim, enviar</button><button class="btn sec" id="envNao">Cancelar</button></div>
-        </div>
-        <p class="muted small">No último dia útil, às 20h, o PDF segue sozinho para a contabilidade se não houver erros. Se houver, recebe um email para rever e aprovar aqui.</p>
       </div>
       <div class="panel" id="gPend" hidden style="border-left:6px solid var(--bad)">
         <h2 class="err">Relatório por aprovar</h2>
         <p class="small" id="gPendTxt"></p>
       </div>
-      <details class="panel" id="gCustos">
-        <summary style="cursor:pointer;font-weight:500;font-size:1.1rem">Custos por obra</summary>
-        <div style="display:grid;gap:12px;margin-top:12px">
-          <p class="muted small">Mês escolhido em cima. Custo = horas × custo/hora de cada colaborador. Só os gestores veem esta área.</p>
-          <div class="rec" id="cuOd"><div class="small" id="cuOdTxt"></div><button class="btn sec" id="btnCuOd" style="margin-top:6px">Atualizar custos/hora do OneDrive</button></div>
-          <p class="err small" id="cuAviso" hidden></p>
-          <div class="tiles" id="cuTiles"></div>
-          <h2>Por obra</h2><p class="muted small" style="margin-top:-6px">Horas de cada colaborador na obra × o seu custo/hora, e o total da obra.</p>
-          <div class="tw"><table id="cuObras"></table></div>
-          <h2>Por colaborador</h2><div class="tw"><table id="cuColab"></table></div>
-          <div class="row2"><button class="btn" id="btnCuFolha">Gerar folha de custos</button><button class="btn sec" id="btnCuCsv">Descarregar CSV</button></div>
-          <button class="btn sec" id="btnCuCrm">Enviar ao CRM</button>
-          <p class="small" id="cuLink" hidden></p>
-        </div>
-      </details>
-      <details class="panel" id="gFichas">
-        <summary style="cursor:pointer;font-weight:500;font-size:1.1rem">Fichas dos colaboradores</summary>
-        <div style="display:grid;gap:10px;margin-top:12px">
-          <label for="fcColab">Colaborador <select id="fcColab"></select></label>
-          <div id="fcForm" hidden style="display:grid;gap:10px">
-            <label for="fcNome">Nome completo <input id="fcNome" maxlength="120"></label>
-            <div class="row2">
-              <label for="fcNasc">Data de nascimento <input id="fcNasc" type="date"></label>
-              <label for="fcTel">Telemóvel <input id="fcTel" inputmode="numeric" maxlength="13"></label>
-            </div>
-            <div class="row2">
-              <label for="fcNif">NIF <input id="fcNif" inputmode="numeric" maxlength="9"></label>
-              <label for="fcNiss">NISS <input id="fcNiss" inputmode="numeric" maxlength="11"></label>
-            </div>
-            <label for="fcEmail">Email <input id="fcEmail" type="email" maxlength="120"></label>
-            <label for="fcMorada">Morada <input id="fcMorada" maxlength="250"></label>
-            <label for="fcCusto">Custo/hora (€) · só gestores <input id="fcCusto" inputmode="decimal" placeholder="Ex.: 12,00"></label>
-            <button class="btn" id="btnFicha">Guardar ficha</button>
-            <p class="muted small">Mudar o telemóvel muda a palavra-passe de entrada desta pessoa. O email recebe as respostas aos pedidos.</p>
+      <div class="seg g5" id="gSeg" role="group" aria-label="Área da gestão">
+        <button class="segb" data-p="gsRel" aria-pressed="true">Relatório</button>
+        <button class="segb" data-p="gsPed" aria-pressed="false">Pedidos<span class="badge" id="gPedBadge" hidden></span></button>
+        <button class="segb" data-p="gsReg" aria-pressed="false">Registar</button>
+        <button class="segb" data-p="gsGer" aria-pressed="false">Geral</button>
+        <button class="segb" data-p="gsPic" aria-pressed="false">Picagens</button>
+      </div>
+      <div id="gsRel" class="gseg" style="display:grid;gap:14px">
+        <div class="panel">
+          <h2>Relatório de horas</h2>
+          <button class="btn" id="btnRel">Gerar relatório do mês</button>
+          <p class="small" id="relLink" hidden></p>
+          <button class="btn sec" id="btnEnviar">Aprovar e enviar à contabilidade</button>
+          <div id="envConfirm" hidden style="display:grid;gap:8px">
+            <p class="small">Confirma que o mês está correto? O PDF deste mês segue agora para o email da contabilidade indicado na folha Definições.</p>
+            <div class="row2"><button class="btn" id="envSim">Sim, enviar</button><button class="btn sec" id="envNao">Cancelar</button></div>
           </div>
+          <p class="muted small">No último dia útil, às 20h, o PDF segue sozinho para a contabilidade se não houver erros. Se houver, recebe um email para rever e aprovar aqui.</p>
         </div>
-      </details>
-      <div class="panel"><h2>Avisos de falta</h2><div id="gAvisos"><p class="muted">A carregar…</p></div></div>
-      <div class="panel"><h2>Pedidos de correção de picagem</h2><div id="gCorr"><p class="muted">A carregar…</p></div></div>
-      <div class="panel">
-        <h2>Registar picagem por um colaborador</h2>
-        <p class="muted small">Para quem se esqueceu de picar. Escolha as horas que quiser; deixe a saída vazia se a pessoa ainda estiver em obra.</p>
-        <div class="row2">
-          <label for="pmColab">Colaborador <select id="pmColab"></select></label>
-          <label for="pmData">Dia <input id="pmData" type="date"></label>
-        </div>
-        <label for="pmObra">Obra <select id="pmObra"></select></label>
-        <div class="row2">
-          <label for="pmEnt">Entrada <input id="pmEnt" type="time"></label>
-          <label for="pmSai">Saída <input id="pmSai" type="time"></label>
-        </div>
-        <label for="pmNota">Nota (opcional) <input id="pmNota" maxlength="200" placeholder="Ex.: esqueceu-se de picar"></label>
-        <button class="btn" id="btnPm">Registar picagem</button>
+        <details class="panel" id="gCustos">
+          <summary style="cursor:pointer;font-weight:500;font-size:1.1rem">Custos por obra</summary>
+          <div style="display:grid;gap:12px;margin-top:12px">
+            <p class="muted small">Mês escolhido em cima. Custo = horas × custo/hora de cada colaborador. Só os gestores veem esta área.</p>
+            <div class="rec" id="cuOd"><div class="small" id="cuOdTxt"></div><button class="btn sec" id="btnCuOd" style="margin-top:6px">Atualizar custos/hora do OneDrive</button></div>
+            <p class="err small" id="cuAviso" hidden></p>
+            <div class="tiles" id="cuTiles"></div>
+            <h2>Por obra</h2><p class="muted small" style="margin-top:-6px">Horas de cada colaborador na obra × o seu custo/hora, e o total da obra.</p>
+            <div class="tw"><table id="cuObras"></table></div>
+            <h2>Por colaborador</h2><div class="tw"><table id="cuColab"></table></div>
+            <div class="row2"><button class="btn" id="btnCuFolha">Gerar folha de custos</button><button class="btn sec" id="btnCuCsv">Descarregar CSV</button></div>
+            <button class="btn sec" id="btnCuCrm">Enviar ao CRM</button>
+            <p class="small" id="cuLink" hidden></p>
+          </div>
+        </details>
+        <details class="panel" id="gFichas">
+          <summary style="cursor:pointer;font-weight:500;font-size:1.1rem">Fichas dos colaboradores</summary>
+          <div style="display:grid;gap:10px;margin-top:12px">
+            <label for="fcColab">Colaborador <select id="fcColab"></select></label>
+            <div id="fcForm" hidden style="display:grid;gap:10px">
+              <label for="fcNome">Nome completo <input id="fcNome" maxlength="120"></label>
+              <div class="row2">
+                <label for="fcNasc">Data de nascimento <input id="fcNasc" type="date"></label>
+                <label for="fcTel">Telemóvel <input id="fcTel" inputmode="numeric" maxlength="13"></label>
+              </div>
+              <div class="row2">
+                <label for="fcNif">NIF <input id="fcNif" inputmode="numeric" maxlength="9"></label>
+                <label for="fcNiss">NISS <input id="fcNiss" inputmode="numeric" maxlength="11"></label>
+              </div>
+              <label for="fcEmail">Email <input id="fcEmail" type="email" maxlength="120"></label>
+              <label for="fcMorada">Morada <input id="fcMorada" maxlength="250"></label>
+              <label for="fcCusto">Custo/hora (€) · só gestores <input id="fcCusto" inputmode="decimal" placeholder="Ex.: 12,00"></label>
+              <button class="btn" id="btnFicha">Guardar ficha</button>
+              <p class="muted small">Mudar o telemóvel muda a palavra-passe de entrada desta pessoa. O email recebe as respostas aos pedidos.</p>
+            </div>
+          </div>
+        </details>
       </div>
-      <div class="panel"><h2>Pedidos de férias</h2><div id="gFerias"><p class="muted">A carregar…</p></div></div>
-      <div class="panel">
-        <h2>Marcar férias a um colaborador</h2>
-        <p class="muted small">Ficam logo aprovadas. Pode usar qualquer data (sem os 3 meses de antecedência), mantendo o máximo de 15 dias seguidos e os dias disponíveis no ano.</p>
-        <label for="mfColab">Colaborador <select id="mfColab"></select></label>
-        <div class="row2">
-          <label for="mfDe">Primeiro dia <input id="mfDe" type="date"></label>
-          <label for="mfAte">Último dia <input id="mfAte" type="date"></label>
-        </div>
-        <label for="mfNota">Nota (opcional) <input id="mfNota" maxlength="300" placeholder="Ex.: férias coletivas de agosto"></label>
-        <button class="btn" id="btnMarcar">Marcar férias</button>
+      <div id="gsPed" class="gseg" hidden style="display:grid;gap:14px">
+        <div class="panel"><h2>Saídas antecipadas e horas extra</h2><p class="muted small">Saída antes do fim do horário: só conta depois de aprovar. Horas extra: o dia conta até ao fim do horário e as horas a mais só contam se aprovar.</p><div id="gSaidas"><p class="muted">A carregar…</p></div></div>
+        <div class="panel"><h2>Avisos de falta</h2><div id="gAvisos"><p class="muted">A carregar…</p></div></div>
+        <div class="panel"><h2>Pedidos de férias</h2><div id="gFerias"><p class="muted">A carregar…</p></div></div>
+        <div class="panel"><h2>Pedidos de correção de picagem</h2><div id="gCorr"><p class="muted">A carregar…</p></div></div>
       </div>
-      <div class="panel"><h2>Faltas do mês</h2><div id="gFaltas"><p class="muted">A carregar…</p></div>
-        <p class="muted small">Dias úteis sem nenhuma picagem. Férias, doença e faltas justificadas registam-se no separador Ausências da folha.</p></div>
-      <div class="panel"><h2>Agora em obra</h2><div id="gAgora"><p class="muted">A carregar…</p></div></div>
-      <div class="panel"><h2>Por colaborador</h2><div class="tw"><table id="gColabT"></table></div></div>
-      <div class="panel"><h2>Por obra</h2><div class="tw"><table id="gObraT"></table></div></div>
-      <div class="panel"><h2>Todas as picagens</h2><div id="gLista"></div></div>
+      <div id="gsReg" class="gseg" hidden style="display:grid;gap:14px">
+        <div class="panel">
+          <h2>Registar picagem por um colaborador</h2>
+          <p class="muted small">Para quem se esqueceu de picar. Escolha as horas que quiser; deixe a saída vazia se a pessoa ainda estiver em obra.</p>
+          <div class="row2">
+            <label for="pmColab">Colaborador <select id="pmColab"></select></label>
+            <label for="pmData">Dia <input id="pmData" type="date"></label>
+          </div>
+          <label for="pmObra">Obra <select id="pmObra"></select></label>
+          <div class="row2">
+            <label for="pmEnt">Entrada <input id="pmEnt" type="time"></label>
+            <label for="pmSai">Saída <input id="pmSai" type="time"></label>
+          </div>
+          <label for="pmNota">Nota (opcional) <input id="pmNota" maxlength="200" placeholder="Ex.: esqueceu-se de picar"></label>
+          <button class="btn" id="btnPm">Registar picagem</button>
+        </div>
+        <div class="panel">
+          <h2>Marcar férias a um colaborador</h2>
+          <p class="muted small">Ficam logo aprovadas. Pode usar qualquer data (sem a antecedência mínima), mantendo o máximo de 15 dias seguidos e os dias disponíveis no ano.</p>
+          <label for="mfColab">Colaborador <select id="mfColab"></select></label>
+          <div class="row2">
+            <label for="mfDe">Primeiro dia <input id="mfDe" type="date"></label>
+            <label for="mfAte">Último dia <input id="mfAte" type="date"></label>
+          </div>
+          <label for="mfNota">Nota (opcional) <input id="mfNota" maxlength="300" placeholder="Ex.: férias coletivas de agosto"></label>
+          <button class="btn" id="btnMarcar">Marcar férias</button>
+        </div>
+      </div>
+      <div id="gsGer" class="gseg" hidden style="display:grid;gap:14px">
+        <div class="panel"><div class="tiles" id="gTiles"></div></div>
+        <div class="panel"><h2>Faltas do mês</h2><div id="gFaltas"><p class="muted">A carregar…</p></div>
+          <p class="muted small">Dias úteis sem nenhuma picagem. Férias, doença e faltas justificadas registam-se no separador Ausências da folha.</p></div>
+        <div class="panel"><h2>Agora em obra</h2><div id="gAgora"><p class="muted">A carregar…</p></div></div>
+        <div class="panel"><h2>Por colaborador</h2><div class="tw"><table id="gColabT"></table></div></div>
+        <div class="panel"><h2>Por obra</h2><div class="tw"><table id="gObraT"></table></div></div>
+      </div>
+      <div id="gsPic" class="gseg" hidden style="display:grid;gap:14px">
+        <div class="panel"><h2>Todas as picagens</h2><div id="gLista"></div></div>
+      </div>
     </section>
   </div>
 </main>
@@ -368,7 +398,7 @@ a.link { color: var(--ink); font-weight: 500; }
   function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function toast(m) { var t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 3500); }
+  function toast(m, ms) { var t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, ms || 3500); }
   function fmtH(h) { var min = Math.round((h || 0) * 60), hh = Math.floor(min / 60), mm = min % 60; return mm ? hh + 'h' + (mm < 10 ? '0' : '') + mm : hh + 'h'; }
 
   // Dentro do Google (link /exec) usa google.script.run; na app instalada fala com a API (doPost) por fetch.
@@ -509,9 +539,9 @@ a.link { color: var(--ink); font-weight: 500; }
       b.textContent = 'A registar…';
       return run('mudarObra', token, obra, loc);
     }).then(function (s) {
-      $('mudar').open = false; $('mObra').value = ''; $('mLocal').textContent = ''; aplicar(s);
+      $('mObra').value = ''; $('mLocal').textContent = ''; aplicar(s);
       toast('Chegada a ' + obra + ' registada às ' + s.aberta.entrada);
-    }).catch(erroLocal).then(function () { b.disabled = false; b.textContent = 'Cheguei a esta obra'; });
+    }).catch(erroLocal).then(function () { b.disabled = false; b.textContent = 'Mudar de obra'; });
   });
   function erroLocal(e) {
     falha(e);
@@ -540,7 +570,8 @@ a.link { color: var(--ink); font-weight: 500; }
     }).then(function (s) {
       $('sLocal').textContent = ''; b.textContent = txt;
       $('sNota').value = ''; aplicar(s);
-      toast('Saída registada às ' + fHora.format(new Date(Date.now() + offset)) + '. Bom descanso!');
+      if (s.aviso) toast(s.aviso, 9000);
+      else toast('Saída registada às ' + fHora.format(new Date(Date.now() + offset)) + '. Bom descanso!');
     }).catch(erroLocal).then(function () { b.disabled = false; if (/^A /.test(b.textContent)) b.textContent = txt; });
   });
 
@@ -566,8 +597,14 @@ a.link { color: var(--ink); font-weight: 500; }
         .map(function (x) { return '<div class="tile"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('');
       var aviso = (r.faltas.length ? '<div class="rec"><div class="top"><span class="err">Faltas (dias úteis sem picagem)</span><span class="err">' + r.faltas.length + '</span></div><div class="muted small">' + r.faltas.map(esc).join(', ') + '</div><div class="muted small">Se estava a trabalhar ou de férias, fale com o escritório.</div></div>' : '') +
         r.ausencias.map(function (a) { return '<div class="rec"><div class="top"><span>' + esc(a.motivo) + '</span><span>' + esc(a.data) + '</span></div></div>'; }).join('');
+      aviso = (r.saidas || []).map(function (x) {
+        return '<div class="rec"><div class="top"><span>' + esc(x.tipo) + ' · ' + esc(x.data) + '</span><span class="st ' + esc(x.estado) + '">' + esc(x.estado) + '</span></div>' +
+          '<div class="muted small">' + esc(x.obra) + ' · saída ' + esc(x.saida) + ' (horário até ' + esc(x.fim) + ') · ' + esc(x.duracao) + '</div>' +
+          (x.decididoPor ? '<div class="muted small">' + esc(x.estado) + ' por ' + esc(x.decididoPor) + (x.nota ? ': ' + esc(x.nota) : '') + '</div>' : '') + '</div>';
+      }).join('') + aviso;
       $('mLista').innerHTML = aviso + (r.lista.length ? r.lista.map(function (p) {
-        var est = p.estado === 'Em obra' ? '<span class="flag">em obra</span>' : p.estado === 'Falta saída' ? '<span class="flag">falta saída</span>' : '<span class="h">' + fmtH(p.total) + '</span>';
+        var est = p.estado === 'Em obra' ? '<span class="flag">em obra</span>' : p.estado === 'Falta saída' ? '<span class="flag">falta saída</span>'
+          : p.estado === 'Saída por aprovar' ? '<span class="st Pendente">por aprovar</span>' : '<span class="h">' + fmtH(p.total) + '</span>';
         return '<div class="rec"><div class="top"><span>' + esc(p.data) + ' · ' + esc(p.dia) + '</span>' + est + '</div>' +
           '<div>' + esc(p.obra) + '</div>' +
           '<div class="muted small">' + esc(p.entrada) + ' – ' + (esc(p.saida) || '…') + (p.pausa ? ' · pausa ' + p.pausa + ' min' : '') + ' · ' + esc(p.tipo) +
@@ -672,6 +709,9 @@ a.link { color: var(--ink); font-weight: 500; }
     desenharFeriasGestao();
     desenharCorrGestao();
     desenharAvisosGestao();
+    desenharSaidasGestao();
+    var nPed = (G.saidas || []).length + G.avisos.length + G.correcoes.length + G.ferias.pendentes.length;
+    $('gPedBadge').hidden = !nPed; $('gPedBadge').textContent = nPed;
     ['pmColab'].forEach(function (id) { var cur = $(id).value; $(id).innerHTML = '<option value="">Escolha…</option>' + G.colaboradores.map(function (c) { return '<option>' + esc(c.nome) + '</option>'; }).join(''); if (cur) $(id).value = cur; });
     var po = $('pmObra').value; $('pmObra').innerHTML = '<option value="">Escolha…</option>' + G.obras.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join(''); if (po) $('pmObra').value = po;
     if (estado) $('pmData').max = estado.hoje.data;
@@ -752,7 +792,7 @@ a.link { color: var(--ink); font-weight: 500; }
   function desenharFerias(r) {
     F = r;
     var minPt = r.minData.split('-').reverse().join('/');
-    $('fRegras').textContent = 'Tem ' + r.diasAno + ' dias de férias por ano e pode dividi-los em quantos pedidos quiser (1, 2, 11 dias…), com no máximo ' + r.maxDias + ' dias seguidos. Pedidos com ' + r.antecedencia + ' meses de antecedência: hoje só pode pedir a partir de ' + minPt + '. Para datas mais próximas, fale com o gestor.';
+    $('fRegras').textContent = 'Tem ' + r.diasAno + ' dias de férias por ano e pode dividi-los em quantos pedidos quiser (1, 2, 11 dias…), com no máximo ' + r.maxDias + ' dias seguidos. Hoje só pode pedir a partir de ' + minPt + ' (não pode ser hoje nem amanhã). Depois o gestor analisa e aprova.';
     $('fDe').min = r.minData; $('fAte').min = r.minData;
     var ano = estado ? estado.hoje.data.slice(0, 4) : String(new Date().getFullYear()), prox = String(Number(ano) + 1);
     $('fSaldo').innerHTML = [ano, prox].map(function (a) {
@@ -849,9 +889,15 @@ a.link { color: var(--ink); font-weight: 500; }
   }
 
   // Pedidos: escolher o tipo
-  document.querySelector('.seg').addEventListener('click', function (ev) {
+  $('gSeg').addEventListener('click', function (ev) {
     var b = ev.target.closest('.segb'); if (!b) return;
-    document.querySelectorAll('.segb').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); $(x.dataset.p).hidden = x !== b; });
+    this.querySelectorAll('.segb').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); $(x.dataset.p).hidden = x !== b; });
+    try { localStorage.setItem('pgm.gseg', b.dataset.p); } catch (e) {}
+  });
+  try { var gs0 = localStorage.getItem('pgm.gseg'); if (gs0 && $(gs0)) document.querySelector('#gSeg [data-p="' + gs0 + '"]').click(); } catch (e) {}
+  document.querySelector('#tFerias .seg').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.segb'); if (!b) return;
+    this.querySelectorAll('.segb').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); $(x.dataset.p).hidden = x !== b; });
   });
 
   // Avisos de falta (colaborador)
@@ -863,7 +909,8 @@ a.link { color: var(--ink); font-weight: 500; }
   }
   function desenharAvisos(r) {
     AVS = r.avisos;
-    $('avDe').min = r.hoje; $('avAte').min = r.hoje;
+    $('avDe').min = r.minData || r.hoje; $('avAte').min = r.minData || r.hoje;
+    $('avRegra').textContent = 'Só pode avisar com antecedência: hoje, a partir de ' + (r.minData || r.hoje).split('-').reverse().join('/') + '. Para hoje ou amanhã, fale diretamente com o gestor.';
     var cur = $('avMotivo').value;
     $('avMotivo').innerHTML = '<option value="">Escolha…</option>' + r.motivos.map(function (m) { return '<option>' + esc(m) + '</option>'; }).join('');
     if (cur) $('avMotivo').value = cur;
@@ -1028,6 +1075,27 @@ a.link { color: var(--ink); font-weight: 500; }
     run('guardarFicha', token, nome, { nomeCompleto: $('fcNome').value, nascimento: $('fcNasc').value, telefone: $('fcTel').value,
       nif: $('fcNif').value, niss: $('fcNiss').value, email: $('fcEmail').value, morada: $('fcMorada').value, custoHora: $('fcCusto').value })
       .then(function (l) { FICHAS = l; listarFichas(); toast('Ficha de ' + nome + ' guardada'); }).catch(falha).then(function () { b.disabled = false; });
+  });
+
+  // Gestor: saídas antes do horário e horas extra
+  function desenharSaidasGestao() {
+    var l = G.saidas || [];
+    $('gSaidas').innerHTML = l.length ? l.map(function (x) {
+      var ant = x.tipo === 'Saída antecipada';
+      return '<div class="rec"><div class="top"><span>' + esc(x.colaborador) + '</span><span class="st Pendente">' + esc(x.tipo) + '</span></div>' +
+        '<div><b>' + esc(x.data) + '</b> · ' + esc(x.obra) + '</div>' +
+        '<div class="muted small">Entrada ' + esc(x.entrada) + ' · saída <b>' + esc(x.saida) + '</b> · horário até ' + esc(x.fim) + ' · ' + (ant ? 'saiu ' + esc(x.duracao) + ' mais cedo' : esc(x.duracao) + ' de horas extra') + '</div>' +
+        (x.notaColab ? '<div class="muted small">Nota: ' + esc(x.notaColab) + '</div>' : '') +
+        '<div class="acts" data-id="' + esc(x.id) + '"><input class="sdN" placeholder="Nota (opcional)" aria-label="Nota"><button class="btn sdOk">Aprovar</button><button class="btn sec sdNo">Recusar</button></div></div>';
+    }).join('') : '<p class="muted">Sem saídas por aprovar.</p>';
+  }
+  $('gSaidas').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.sdOk, .sdNo'); if (!b) return;
+    var box = b.closest('.acts'), ok = b.classList.contains('sdOk');
+    box.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+    run('decidirSaida', token, box.dataset.id, ok, box.querySelector('.sdN').value).then(function () {
+      toast(ok ? 'Aprovado' : 'Recusado'); carregarGestao();
+    }).catch(function (e) { falha(e); box.querySelectorAll('button').forEach(function (x) { x.disabled = false; }); });
   });
 
   // Gestor: correções e picagem manual
