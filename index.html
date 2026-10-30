@@ -742,30 +742,62 @@ a.link { color: var(--ink); font-weight: 500; }
     $('gObraT').innerHTML = '<thead><tr><th>Obra</th><th class="n">Pessoas</th><th class="n">Picagens</th><th class="n">Horas</th></tr></thead><tbody>' +
       (linhasO || '<tr><td colspan="4" class="muted">Sem picagens.</td></tr>') + '</tbody>';
 
-    $('gLista').innerHTML = l.length ? l.map(function (p) {
-      var aberta = p.estado !== 'Concluído';
-      var est = p.estado === 'Em obra' ? '<span class="flag">em obra</span>' : p.estado === 'Falta saída' ? '<span class="flag">falta saída</span>' : '<span class="h">' + fmtH(p.total) + '</span>';
-      return '<div class="rec"><div class="top"><span>' + esc(p.colaborador) + '</span>' + est + '</div>' +
+    // Mesmo colaborador com mais de uma picagem no dia: mostra o aviso; se as horas se sobrepõem, é quase de certeza repetida.
+    var mm = function (t) { var m = String(t || '').match(/^(\d{1,2}):(\d{2})/); return m ? +m[1] * 60 + +m[2] : null; };
+    var porDia = {};
+    l.forEach(function (p) { (porDia[p.colaborador + '|' + p.data] = porDia[p.colaborador + '|' + p.data] || []).push(p); });
+    var dup = {};
+    Object.keys(porDia).forEach(function (k) {
+      var ps = porDia[k]; if (ps.length < 2) return;
+      ps.forEach(function (a) {
+        var a1 = mm(a.entrada), a2 = mm(a.saida); if (a2 === null) a2 = 1e9;
+        var sob = ps.some(function (b) { if (b === a) return false; var b1 = mm(b.entrada), b2 = mm(b.saida); if (b2 === null) b2 = 1e9; return a1 < b2 && b1 < a2; });
+        dup[a.id] = { n: ps.length, sob: sob };
+      });
+    });
+    var nSob = Object.keys(dup).filter(function (k) { return dup[k].sob; }).length;
+    var optsObra = function (atual) {
+      var os = G.obras.indexOf(atual) < 0 ? [atual].concat(G.obras) : G.obras;
+      return os.map(function (o) { return '<option' + (o === atual ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('');
+    };
+    $('gLista').innerHTML = (nSob ? '<div class="rec" style="border-left:4px solid var(--bad)"><b class="err">' + nSob + ' picagens repetidas</b><div class="muted small">Mesmo colaborador, mesmo dia, horas sobrepostas. Abra "Corrigir / excluir" para acertar ou apagar a que está a mais.</div></div>' : '') +
+    (l.length ? l.map(function (p) {
+      var aberta = p.estado !== 'Concluído', d = dup[p.id];
+      var est = p.estado === 'Em obra' ? '<span class="flag">em obra</span>' : p.estado === 'Falta saída' ? '<span class="flag">falta saída</span>'
+        : p.estado === 'Saída por aprovar' ? '<span class="st Pendente">por aprovar</span>' : '<span class="h">' + fmtH(p.total) + '</span>';
+      return '<div class="rec"' + (d && d.sob ? ' style="border-left:4px solid var(--bad)"' : '') + '><div class="top"><span>' + esc(p.colaborador) + '</span>' + est + '</div>' +
+        (d ? '<div class="small ' + (d.sob ? 'err' : 'muted') + '">' + (d.sob ? '⚠ Picagem repetida: ' : '') + d.n + ' picagens neste dia' + (d.sob ? ' com horas sobrepostas' : '') + '</div>' : '') +
         '<div class="muted small">' + esc(p.data) + ' · ' + esc(p.dia) + ' · ' + esc(p.tipo) + ' · ' + esc(p.obra) + '</div>' +
         '<div class="muted small">' + esc(p.entrada) + ' – ' + (esc(p.saida) || '…') + (p.pausa ? ' · pausa ' + p.pausa + ' min' : '') +
         (p.extra || p.sabado || p.domingo || p.feriado ? ' · extra ' + fmtH(p.extra + p.sabado + p.domingo + p.feriado) : '') + '</div>' +
         (p.localEnt || p.localSai ? '<div class="muted small">Local: ' + (p.localEnt ? 'entrada ' + esc(p.localEnt) : '') + (p.localSai ? (p.localEnt ? ' · ' : '') + 'saída ' + esc(p.localSai) : '') + '</div>' : '') +
         (p.nota ? '<div class="muted small">' + esc(p.nota) + '</div>' : '') +
-        '<details class="ed"><summary class="small" style="cursor:pointer;margin-top:4px">' + (aberta ? '<b class="err">Corrigir</b>' : 'Editar') + '</summary>' +
-        '<div class="fix" data-id="' + esc(p.id) + '"><input type="time" aria-label="Entrada" class="fxE" value="' + esc(p.entrada) + '"><input type="time" aria-label="Saída" class="fxS" value="' + esc(p.saida) + '">' +
-        '<button class="btn sec fxB" style="grid-column:1 / -1">Guardar entrada e saída</button></div></details>' +
+        '<details class="ed"' + (d && d.sob ? ' open' : '') + '><summary class="small" style="cursor:pointer;margin-top:4px">' + (aberta || (d && d.sob) ? '<b class="err">Corrigir / excluir</b>' : 'Corrigir / excluir') + '</summary>' +
+        '<div class="fix" data-id="' + esc(p.id) + '"><select class="fxO" aria-label="Obra" style="grid-column:1 / -1">' + optsObra(p.obra) + '</select>' +
+        '<input type="time" aria-label="Entrada" class="fxE" value="' + esc(p.entrada) + '"><input type="time" aria-label="Saída" class="fxS" value="' + esc(p.saida) + '">' +
+        '<button class="btn sec fxB" style="grid-column:1 / -1">Guardar correção</button>' +
+        '<button class="btn sec fxX" style="grid-column:1 / -1;color:var(--bad)">Excluir esta picagem</button></div></details>' +
         '</div>';
-    }).join('') : '<p class="muted">Sem picagens neste período.</p>';
+    }).join('') : '<p class="muted">Sem picagens neste período.</p>');
   }
   $('gMes').addEventListener('change', function () { $('relLink').hidden = true; carregarGestao(); });
   $('gColab').addEventListener('change', desenharGestao);
   $('gObra').addEventListener('change', desenharGestao);
   $('gLista').addEventListener('click', function (ev) {
+    var x = ev.target.closest('.fxX');
+    if (x) {
+      // Dois toques: o primeiro pede confirmação.
+      if (!x.dataset.ok) { x.dataset.ok = '1'; x.textContent = 'Tem a certeza? Toque outra vez para excluir'; x.style.background = 'var(--bad)'; x.style.color = '#fff'; return; }
+      x.disabled = true; x.textContent = 'A excluir…';
+      run('excluirPicagem', token, x.closest('.fix').dataset.id, 'Excluída na app').then(function () { toast('Picagem excluída'); carregarGestao(); })
+        .catch(function (e) { falha(e); x.disabled = false; x.textContent = 'Excluir esta picagem'; delete x.dataset.ok; x.style.background = ''; x.style.color = 'var(--bad)'; });
+      return;
+    }
     var b = ev.target.closest('.fxB'); if (!b) return;
     var box = b.closest('.fix'), ent = box.querySelector('.fxE').value, sai = box.querySelector('.fxS').value;
     if (!ent) return toast('Indique a hora de entrada.');
     b.disabled = true;
-    run('editarPicagem', token, box.dataset.id, '', '', ent, sai, '').then(function () { toast('Picagem atualizada'); carregarGestao(); })
+    run('editarPicagem', token, box.dataset.id, '', box.querySelector('.fxO').value, ent, sai, '').then(function () { toast('Picagem corrigida'); carregarGestao(); })
       .catch(falha).then(function () { b.disabled = false; });
   });
   $('btnRel').addEventListener('click', function () {
