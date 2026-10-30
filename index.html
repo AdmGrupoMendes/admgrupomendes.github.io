@@ -304,7 +304,7 @@ a.link { color: var(--ink); font-weight: 500; }
         <details class="panel" id="gCustos">
           <summary style="cursor:pointer;font-weight:500;font-size:1.1rem">Custos por obra</summary>
           <div style="display:grid;gap:12px;margin-top:12px">
-            <p class="muted small">Mês escolhido em cima. Custo = horas × custo/hora de cada colaborador. Só os gestores veem esta área.</p>
+            <p class="muted small">Mês escolhido em cima. Horas normais × custo/hora. Horas suplementares (extra, sábado, domingo, feriado) pelo Código do Trabalho (art. 268.º): valor da hora × TSU com +25% na 1.ª hora do dia útil, +37,5% nas seguintes e +50% em descanso/feriado; acima de 100 h no ano, +50% / +75% / +100%. Só os gestores veem esta área.</p>
             <div class="rec" id="cuOd"><div class="small" id="cuOdTxt"></div><button class="btn sec" id="btnCuOd" style="margin-top:6px">Atualizar custos/hora do OneDrive</button></div>
             <p class="err small" id="cuAviso" hidden></p>
             <div class="tiles" id="cuTiles"></div>
@@ -1045,18 +1045,26 @@ a.link { color: var(--ink); font-weight: 500; }
     desenharOneDrive(c.oneDrive);
     $('cuAviso').hidden = !c.semCusto.length;
     $('cuAviso').textContent = c.semCusto.length ? 'Sem custo/hora na ficha (contam 0 €): ' + c.semCusto.join(', ') + '. Preencha em "Fichas dos colaboradores".' : '';
-    $('cuTiles').innerHTML = [['Custo total', eur(c.total.custo)], ['Horas', fmtH(c.total.horas)], ['Obras', c.porObra.length]]
+    $('cuTiles').innerHTML = [['Custo total', eur(c.total.custo)], ['Horas', fmtH(c.total.horas)], ['Obras', c.porObra.length],
+      ['Suplementares', fmtH(c.total.suplementar || 0)], ['Custo suplementar', eur(c.total.custoSuplementar || 0)]]
       .map(function (x) { return '<div class="tile"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('');
     var tab = function (rows, cab) { return '<thead><tr>' + cab + '</tr></thead><tbody>' + (rows || '<tr><td colspan="6" class="muted">Sem horas neste mês.</td></tr>') + '</tbody>'; };
     $('cuObras').innerHTML = tab(c.porObra.map(function (o) {
       return '<tr><td colspan="3" style="padding-top:14px"><b style="color:var(--verde)">' + esc(o.nome) + '</b></td></tr>' +
         (o.colaboradores || []).map(function (l) {
-          return '<tr><td style="white-space:normal">' + esc(l.colaborador) + '<div class="muted small">' + fmtH(l.horas) + ' × ' + eur(l.custoHora) + '/h</div></td><td class="n">' + fmtH(l.horas) + '</td><td class="n">' + eur(l.custo) + '</td></tr>';
+          var normais = l.horas - (l.suplementar || 0);
+          return '<tr><td style="white-space:normal">' + esc(l.colaborador) + '<div class="muted small">' + fmtH(normais) + ' × ' + eur(l.custoHora) + '/h' +
+            (l.suplementar ? '<br>+ ' + fmtH(l.suplementar) + ' suplementares = ' + eur(l.custoSuplementar) : '') + '</div></td><td class="n">' + fmtH(l.horas) + '</td><td class="n">' + eur(l.custo) + '</td></tr>';
         }).join('') +
         '<tr style="background:var(--chip)"><td><b>Total da obra</b></td><td class="n"><b>' + fmtH(o.horas) + '</b></td><td class="n"><b>' + eur(o.custo) + '</b></td></tr>';
     }).join('') + (c.porObra.length > 1 ? '<tr style="background:var(--line)"><td><b>Total de todas as obras</b></td><td class="n"><b>' + fmtH(c.total.horas) + '</b></td><td class="n"><b>' + eur(c.total.custo) + '</b></td></tr>' : ''),
       '<th>Colaborador</th><th class="n">Horas</th><th class="n">Custo</th>');
-    $('cuColab').innerHTML = tab(c.porColaborador.map(function (o) { return '<tr><td>' + esc(o.nome) + '</td><td class="n">' + fmtH(o.horas) + '</td><td class="n"><b>' + eur(o.custo) + '</b></td></tr>'; }).join(''),
+    $('cuColab').innerHTML = tab(c.porColaborador.map(function (o) {
+      return '<tr><td style="white-space:normal">' + esc(o.nome) + (o.suplementar || o.suplementarAno ? '<div class="muted small">' + fmtH(o.suplementar || 0) + ' suplementares no mês · ' +
+        '<span' + (o.suplementarAno > (c.limiteAno || 100) ? ' class="err"' : '') + '>' + fmtH(o.suplementarAno || 0) + ' de ' + (c.limiteAno || 100) + ' h no ano</span>' +
+        (o.semSalario && o.suplementar ? '<br><span class="err">sem salário base na ficha</span>' : '') + '</div>' : '') +
+        '</td><td class="n">' + fmtH(o.horas) + '</td><td class="n"><b>' + eur(o.custo) + '</b></td></tr>';
+    }).join(''),
       '<th>Colaborador</th><th class="n">Horas</th><th class="n">Custo</th>');
   }
   $('gCustos').addEventListener('toggle', carregarCustos);
